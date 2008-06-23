@@ -9,17 +9,17 @@ tcs.clock.timeformat = gkini.ReadString("tcs", "clock.timeformat", "!Current tim
 tcs.clock.HUDformat = gkini.ReadString("tcs", "clock.HUDformat", "!%H:%M")
 tcs.clock.freq = gkini.ReadInt("tcs","clock.pollingfreq", 500)
 
-tcs.clock.PDATime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=PDASecondaryInfo.font, fgolor=PDASecondaryInfo.fgcolor,alignment="ACENTER"}
+tcs.clock.PDATime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=PDASecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
 tcs.clock.PDAmain = iup.hbox {
-	tcs.clock.PDATime
+	iup.fill{},tcs.clock.PDATime,iup.fill{}
 }
-tcs.clock.StationTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=StationSecondaryInfo.font, fgolor=StationSecondaryInfo.fgcolor,alignment="ACENTER"}
+tcs.clock.StationTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=StationSecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
 tcs.clock.Stationmain = iup.hbox {
-	tcs.clock.StationTime
+	iup.fill{},tcs.clock.StationTime,iup.fill{}
 }
-tcs.clock.CapShipTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=CapShipSecondaryInfo.font, fgolor=CapShipSecondaryInfo.fgcolor,alignment="ACENTER"}
+tcs.clock.CapShipTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=CapShipSecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
 tcs.clock.CapShipmain = iup.hbox {
-	tcs.clock.CapShipTime
+	iup.fill{},tcs.clock.CapShipTime,iup.fill{}
 }
 
 tcs.clock.HUDTime = iup.label { title = gkmisc.date(tcs.clock.HUDformat), font = iup.GetNextChild(HUD.selfinfo).font, fgcolor = iup.GetBrother(iup.GetNextChild(HUD.selfinfo)).fgcolor, expand = "HORIZONTAL", alignment = "ACENTER" }
@@ -53,10 +53,15 @@ function tcs.clock.CreateTimeAreas(first)
 		tcs.clock.HUDmain:show()
 	else
 		iup.Append(HUD.selfinfo, tcs.clock.HUDmain)
-		iup.Append(tcs.GetRelative(PDASecondaryInfo, 1), tcs.clock.PDATime)
+		iup.Append(tcs.GetRelative(StationCurrentLocationInfo, 1), tcs.clock.Stationmain)
+		iup.Append(tcs.GetRelative(PDACurrentLocationInfo, 1), tcs.clock.PDAmain)
+		iup.Append(tcs.GetRelative(CapShipCurrentLocationInfo, 1), tcs.clock.CapShipmain)
+		tcs.clock.Stationmain:show()
 		tcs.clock.PDAmain:show()
-		iup.Refresh(PDADialog)
-		iup.Refresh(tcs.GetRelative(PDASecondaryInfo, 3))
+		tcs.clock.CapShipmain:show()
+		iup.Refresh(tcs.GetRelative(StationCurrentLocationInfo, 1))
+		iup.Refresh(tcs.GetRelative(PDACurrentLocationInfo, 1))
+		iup.Refresh(tcs.GetRelative(CapShipCurrentLocationInfo, 1))
 		
 		tcs.clock.HUDmain:show()
 	end
