@@ -1,6 +1,12 @@
 --[[
 Toastercrush Plugins Suite, written by Scuba Steve 9.0. See README for installation instructions and descriptions.
 
+Copyright info: 
+Copyright Tyler Gibbons(Scuba Steve 9.0), 2008. Feel free to use, distribute, and modify any and all sections of code as 
+	long as I am attributed as the original author of any code used, modified, or distributed. If you make something cool
+	using this code, I'd love to know. Send me a message on IRC, though you'll have to message Miharu first to figure out 
+	name I'm currently using.
+
 This file is the main loader for the rest of the plugins. It also loads common functions used by several plugins.
 Furthermore, it provides a configuration interface for the whole of the plugin suite.
 --]]
@@ -12,8 +18,7 @@ tcs.VERSION = "1.0.0"
 --[[ The all important require() function. This is responsible for checking which modules are loaded and
 loading the modules themselves if they need to be loaded. --]]
 tcs._LOADED = { "tcs-plugins"}
-tcs.LUA_PATH = "?;?.lua;plugins/?/main.lua;plugins/?/?;plugins/?/?.lua;../?/?;../?/?.lua;../?/main.lua"
-tcs.LUA_PATH = tcs.LUA_PATH .. ";snigulp/?/main.lua;snigulp/?/?;snigulp/?/?.lua"
+tcs.LUA_PATH = "?/main.lua;?/?;?/?.lua;?;?.lua;plugins/?/main.lua;plugins/?/?;plugins/?/?.lua;../?/?;../?/?.lua;../?/main.lua;"
 tcs.PROVIDED = {} 					--Table describing the plugins that have provided config interfaces.
 									--To add an interface, merely do tcs.ProvideConfig("plugin name", conf_handle, shortdesc)
 									--When the plugins list is reloaded by the user, TCS will call conf_handle:on_refresh() if it exists.
@@ -39,9 +44,10 @@ function tcs.require(libstring)
 	tcs._LOADED[libstring] = true
 	return true, file()
 end
-
---[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
+--[[---------------------------------------------------------------------------LOADED PLUGINS-------------------------------------------------------------------------------]]
 tcs.require("common")
+tcs.require("vo_clock")
+--[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
 tcs.ui = {}
 tcs.ui.configb = iup.stationbutton { title = "TCS Config",
 				hotkey = iup.K_t,
