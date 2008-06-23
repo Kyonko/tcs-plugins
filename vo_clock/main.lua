@@ -74,10 +74,10 @@ function tcs.clock:OnEvent()
 																				tcs.clock.UpdateTimer:SetTimeout(tcs.clock.freq) 
 																			end)
 	UnregisterEvent(self, "SHIP_SPAWNED")
-	UnregisterEvent(self, "STATION_LOADED")
+	UnregisterEvent(self, "SHOW_STATION")
 end
 RegisterEvent(tcs.clock, "SHIP_SPAWNED")
-RegisterEvent(tcs.clock, "STATION_LOADED")
+RegisterEvent(tcs.clock, "SHOW_STATION")
 
 if(GetCharacterID()) then 
 	tcs.clock:OnEvent() 
