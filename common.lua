@@ -20,7 +20,17 @@ function tcs.GetSibling(iuphand, num)
 	return tcs.GetSibling(iup.GetBrother(iuphand), num -1)
 end
 
-function tcs.ProvideConfig(plugname, conf_if, shortdesc)
-	tcs.PROVIDED[plugname] = { conf_if, shortdesc}
+function tcs.IntToToggleState(i)
+	if i == 1 then return "ON" end
+	return "OFF"
+end
+
+function tcs.ProvideConfig(plugname, conf_if, shortdesc, state_func)
+	tcs.PROVIDED[plugname] = { conf_if, shortdesc, state_func}
+end
+
+function tcs.ToggleStateToInt(state) 
+	if state == "ON" then return 1 end
+	return 0
 end
 

@@ -8,6 +8,7 @@ tcs.clock.PDAformat = gkini.ReadString("tcs", "clock.PDAformat", "!%H:%M %A, %b.
 tcs.clock.timeformat = gkini.ReadString("tcs", "clock.timeformat", "!Current time: %H:%M:%S %A, %b. %d %Y")
 tcs.clock.HUDformat = gkini.ReadString("tcs", "clock.HUDformat", "!%H:%M")
 tcs.clock.freq = gkini.ReadInt("tcs","clock.pollingfreq", 500)
+tcs.clock.curstate = gkini.ReadInt("tcs", "clock.enabled", 1)
 
 tcs.clock.PDATime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=PDASecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
 tcs.clock.PDAmain = iup.hbox {
@@ -40,6 +41,7 @@ end
 tcs.clock.UpdateTimer = Timer()
 
 function tcs.clock.CreateTimeAreas(first)
+	if tcs.clock.curstate ~= 1 then return end
 	if(not first) then
 		tcs.clock.HUDTime = iup.label { title = gkmisc.date(tcs.clock.HUDformat), font = iup.GetNextChild(HUD.selfinfo).font, fgcolor = iup.GetBrother(iup.GetNextChild(HUD.selfinfo)).fgcolor, expand = "HORIZONTAL", alignment = "ACENTER" }
 			tcs.clock.HUDmain = iup.vbox {
@@ -62,7 +64,6 @@ function tcs.clock.CreateTimeAreas(first)
 		iup.Refresh(tcs.GetRelative(StationCurrentLocationInfo, 1))
 		iup.Refresh(tcs.GetRelative(PDACurrentLocationInfo, 1))
 		iup.Refresh(tcs.GetRelative(CapShipCurrentLocationInfo, 1))
-		
 		tcs.clock.HUDmain:show()
 	end
 end
@@ -89,15 +90,26 @@ end
 
 RegisterUserCommand("time", tcs.clock.printtime)
 
-
+local function TableChair(form)
+	if form.value ~= "*t" then
+		if form.value ~= "!*t" then
+			return
+		end
+	end
+	form.value = "Chair"
+	return
+end
 --[[-----------------------------------------Configuration Interface-------------------------------------------]]
 
 local pdaform = iup.text{value=tcs.clock.PDAform,size="200x"}
 local hudform = iup.text{value=tcs.clock.HUDform,size="200x"}
 local timeform = iup.text{value=tcs.clock.timeform,size="200x"}
 local freq = iup.text{value=tcs.clock.freq,size="50x"}
-local closeb = iup.stationbutton{title="Close", action=function()
+local closeb = iup.stationbutton{title="OK", action=function()
 										HideDialog(tcs.clock.maindlg)
+										TableChair(pdaform)
+										TableChair(timeform)
+										TableChair(hudform)
 										gkini.WriteString("tcs", "clock.PDAformat",pdaform.value)
 										gkini.WriteString("tcs", "clock.timeformat",timeform.value)
 										gkini.WriteString("tcs", "clock.HUDformat",hudform.value)
@@ -108,13 +120,21 @@ local closeb = iup.stationbutton{title="Close", action=function()
 										tcs.clock.freq = tonumber(freq.value)
 										ShowDialog(tcs.ui.confdlg)
 									end}
+local cancelb = iup.stationbutton{title="Cancel", action=function()
+										HideDialog(tcs.clock.maindlg)
+										pdaform.value = tcs.clock.PDAformat
+										timeform.value = tcs.clock.timeformat
+										hudform.value = tcs.clock.HUDformat
+										freq.value = tcs.clock.freq
+										ShowDialog(tcs.ui.confdlg)
+									end}
 									
 local function OpenHelp()
 	StationHelpDialog:Open(
 [[On this menu you can adjust settings for the clock displayed in your interface. 
 The various format options help adjust how the time is displayed, and "Update Frequency" adjusts the granularity of the time update command. A lower number here updates the time counters more often. It's suggested you keep this in multiples or factors of your chosen precision settings.
 
-The format options follow the same syntics as lua's os.time() function, and more specifically, VO's gkmisc.GetGameTime() function. All times are based off your local system clock.
+The format options follow the same syntax as lua's os.date() function, and more specifically, VO's gkmisc.GetGameTime() function. All times are based off your local system clock.
 For any questions on syntax, please look below:
 
 	%a	abbreviated weekday name (e.g., Wed)
@@ -134,12 +154,12 @@ For any questions on syntax, please look below:
 	%X	time (e.g., 23:48:10)
 	%Y	full year (1998)
 	%y	two-digit year (98) [00-99]
-	%%	the character `%´
+	%%	the character '%'
 When no format is specified, the plugin will default to the %c format, adding a '!' in front of the format string will convert the output time into UTC/GMT
 
 The year format is, and will be, based on VO ingame year. It won't change, no matter how much you forget which year it is in real life.]])
 end
-local helpclose = iup.hbox{iup.stationbutton{title="Help", hotkey=iup.K_h, action=function() OpenHelp() end}, iup.fill{}, closeb}
+local helpclose = iup.hbox{iup.stationbutton{title="Help", hotkey=iup.K_h, action=function() OpenHelp() end}, iup.fill{}, closeb, cancelb}
 
 local mainv = iup.vbox {
 	iup.hbox{iup.fill{},iup.label{title="VO Clock Config",font=Font.H3},iup.fill{}},
@@ -175,4 +195,27 @@ function tcs.clock.maindlg:init()
 	freq.value = tcs.clock.freq
 end
 
-tcs.ProvideConfig("VO Clock", tcs.clock.maindlg, "Adds a clock to your HUD and PDA.")
+--State modification function.
+function tcs.clock.state(_, v)
+	if v == 1 then
+		tcs.clock.maindlg:init()
+		tcs.clock.curstate = 1
+		tcs.clock.CreateTimeAreas(true)
+		gkini.WriteInt("tcs", "clock.enabled", 1)
+	elseif v == 0 then
+		iup.Detach(tcs.clock.PDAmain)
+		iup.Detach(tcs.clock.HUDmain)
+		iup.Detach(tcs.clock.Stationmain)
+		iup.Detach(tcs.clock.CapShipmain)
+		iup.Refresh(tcs.GetRelative(StationCurrentLocationInfo, 1))
+		iup.Refresh(tcs.GetRelative(PDACurrentLocationInfo, 1))
+		iup.Refresh(tcs.GetRelative(CapShipCurrentLocationInfo, 1))
+		tcs.clock.curstate = 0
+		gkini.WriteInt("tcs", "clock.enabled", 0)
+	elseif v == -1 then
+		return tcs.IntToToggleState(tcs.clock.curstate)
+	end
+	return
+end
+--Make the configuration menu available to TCS
+tcs.ProvideConfig("VO Clock", tcs.clock.maindlg, "Adds a clock to your HUD and PDA.",tcs.clock.state)

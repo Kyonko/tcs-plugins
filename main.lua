@@ -20,10 +20,11 @@ loading the modules themselves if they need to be loaded. --]]
 tcs._LOADED = { "tcs-plugins"}
 tcs.LUA_PATH = "?/main.lua;?/?;?/?.lua;?;?.lua;plugins/?/main.lua;plugins/?/?;plugins/?/?.lua;../?/?;../?/?.lua;../?/main.lua;"
 tcs.PROVIDED = {} 					--Table describing the plugins that have provided config interfaces.
-									--To add an interface, merely do tcs.ProvideConfig("plugin name", conf_handle, shortdesc)
+									--To add an interface, merely do tcs.ProvideConfig("plugin name", conf_handle, shortdesc[, state_func])
 									--When the plugins list is reloaded by the user, TCS will call conf_handle:on_refresh() if it exists.
 									--Conf handle should be an iup handle to the configuration window dialog
 									--If it exists, conf_handle:init() will be called ONCE ONLY, then conf_handle will be displayed via ShowDialog()
+									--state_func is passed 1 if the plugin is enabled, 0 if disabled, and -1 to query the current enabled/disabled state
 function tcs.require(libstring)
 	--Strip out .lua file extension and any path info.
 	libstring = string.gsub(libstring, "\\", "/") -- lawlwindows, backslashes need to be escaped anyway
@@ -79,12 +80,16 @@ local function CreateTCSConfDlg()
 					gap=2,
 					margin="2x2"
 				}
-	
 	local init = false
 	for key, value in pairs(tcs.PROVIDED) do
 		if not key then break end
 		if not value then break end
-		iup.Append(mainv, iup.hbox{iup.stationbutton{title=key,
+		if value[3] then
+			en = iup.stationtoggle{action=value[3],tip="Enable/Disable Plugin",value=value[3](en,-1)}
+		else
+			en = iup.stationtoggle{action=function() end,tip="Enable/Disable Plugin",active="NO"}
+		end
+		iup.Append(mainv, iup.hbox{en, iup.fill{}, iup.stationbutton{title=key,
 								action=function()
 									HideDialog(tcs.ui.cursubdlg)
 									if value[1].init then
