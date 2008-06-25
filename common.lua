@@ -1,3 +1,28 @@
+
+--Will create a generalized configuration window
+--Title is the title of the window, elements are all the little dofangle and bohickies
+--And maindlgops is a table describing the extra options to pass to the main dialog. Things like
+-- .defaultesc and hotkeys
+function tcs.ConfigConstructor(title, elements, maindlgops)
+	local maindlg = iup.dialog{
+		iup.stationhighopacityframe{
+			iup.stationhighopacityframebg{
+				iup.vbox {
+					iup.hbox{iup.fill{},iup.label{title=title,font=Font.H3},iup.fill{}},
+					unpack(elements)
+				}
+			}
+		},
+		menubox="NO",
+		resize="NO",
+		border="NO",
+		unpack(maindlgops),
+		bgcolor = "0 0 0 0 *"
+	}
+	return maindlg
+end
+
+
 --Recursively nabs a parent. Negatives kidnap children.
 --iuphand needs to be a valid iup handle
 --num can be: 0/nil/false is the element itself, 1 is its parent, 2 is its parents parent, 3 is its parent's parent's parent, etc...

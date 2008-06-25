@@ -52,19 +52,19 @@ function tcs.clock.CreateTimeAreas(first)
 			}
 		}
 		iup.Append(HUD.selfinfo, tcs.clock.HUDmain)
-		tcs.clock.HUDmain:show()
+		ShowDialog(tcs.clock.HUDmain)
 	else
 		iup.Append(HUD.selfinfo, tcs.clock.HUDmain)
 		iup.Append(tcs.GetRelative(StationCurrentLocationInfo, 1), tcs.clock.Stationmain)
 		iup.Append(tcs.GetRelative(PDACurrentLocationInfo, 1), tcs.clock.PDAmain)
 		iup.Append(tcs.GetRelative(CapShipCurrentLocationInfo, 1), tcs.clock.CapShipmain)
-		tcs.clock.Stationmain:show()
-		tcs.clock.PDAmain:show()
-		tcs.clock.CapShipmain:show()
+		ShowDialog(tcs.clock.Stationmain)
+		ShowDialog(tcs.clock.PDAmain)
+		ShowDialog(tcs.clock.CapShipmain)
 		iup.Refresh(tcs.GetRelative(StationCurrentLocationInfo, 1))
 		iup.Refresh(tcs.GetRelative(PDACurrentLocationInfo, 1))
 		iup.Refresh(tcs.GetRelative(CapShipCurrentLocationInfo, 1))
-		tcs.clock.HUDmain:show()
+		ShowDialog(tcs.clock.HUDmain)
 	end
 end
 
@@ -118,7 +118,7 @@ local closeb = iup.stationbutton{title="OK", action=function()
 										tcs.clock.timeformat = timeform.value
 										tcs.clock.HUDformat = hudform.value
 										tcs.clock.freq = tonumber(freq.value)
-										ShowDialog(tcs.ui.confdlg)
+										ShowDialog(tcs.ui.confdlg, iup.CENTER, iup.CENTER)
 									end}
 local cancelb = iup.stationbutton{title="Cancel", action=function()
 										HideDialog(tcs.clock.maindlg)
@@ -126,7 +126,7 @@ local cancelb = iup.stationbutton{title="Cancel", action=function()
 										timeform.value = tcs.clock.timeformat
 										hudform.value = tcs.clock.HUDformat
 										freq.value = tcs.clock.freq
-										ShowDialog(tcs.ui.confdlg)
+										ShowDialog(tcs.ui.confdlg, iup.CENTER, iup.CENTER)
 									end}
 									
 local function OpenHelp()
@@ -161,8 +161,7 @@ The year format is, and will be, based on VO ingame year. It won't change, no ma
 end
 local helpclose = iup.hbox{iup.stationbutton{title="Help", hotkey=iup.K_h, action=function() OpenHelp() end}, iup.fill{}, closeb, cancelb}
 
-local mainv = iup.vbox {
-	iup.hbox{iup.fill{},iup.label{title="VO Clock Config",font=Font.H3},iup.fill{}},
+local mainv = {
 	iup.hbox{iup.label{title="PDA Format:"},iup.fill{},pdaform},
 	iup.hbox{iup.label{title="HUD Format:"},iup.fill{},hudform},
 	iup.hbox{iup.label{title="/time Format:"},iup.fill{},timeform},
@@ -171,18 +170,7 @@ local mainv = iup.vbox {
 	helpclose
 }
 
-tcs.clock.maindlg = iup.dialog{
-	iup.stationhighopacityframe{
-		iup.stationhighopacityframebg{
-			mainv
-		}
-	},
-	menubox="NO",
-	resize="NO",
-	border="NO",
-	defaultesc = closeb,
-	bgcolor = "0 0 0 0 *"
-}
+tcs.clock.maindlg = tcs.ConfigConstructor("VO Clock Config", mainv, {defaultesc = closeb})
 
 function tcs.clock.maindlg:init()
 	tcs.clock.PDAformat = gkini.ReadString("tcs", "clock.PDAformat", "!%H:%M %A, %b. %d %Y")

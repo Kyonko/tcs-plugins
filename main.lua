@@ -48,6 +48,7 @@ end
 --[[---------------------------------------------------------------------------LOADED PLUGINS-------------------------------------------------------------------------------]]
 tcs.require("common")
 tcs.require("vo_clock")
+tcs.require("auto_nav")
 --[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
 tcs.ui = {}
 tcs.ui.configb = iup.stationbutton { title = "TCS Config",
@@ -56,7 +57,6 @@ tcs.ui.configb = iup.stationbutton { title = "TCS Config",
 					HideDialog(OptionsDialog)
 					--tcs.ui.confdlg:setup()
 					ShowDialog(tcs.ui.confdlg, iup.CENTER, iup.CENTER)
-					tcs.ui.cursubdlg = tcs.ui.confdlg
 				end}
 
 function tcs.ui.InsertOption(confb)
@@ -89,15 +89,17 @@ local function CreateTCSConfDlg()
 		else
 			en = iup.stationtoggle{action=function() end,tip="Enable/Disable Plugin",active="NO"}
 		end
-		iup.Append(mainv, iup.hbox{en, iup.fill{}, iup.stationbutton{title=key,
+		local figb = iup.stationbutton{title=key,
 								action=function()
-									HideDialog(tcs.ui.cursubdlg)
-									if value[1].init then
+									HideDialog(tcs.ui.confdlg)
+									if value[1] and value[1].init then
 										value[1]:init()
 									end
 									ShowDialog(value[1], iup.CENTER, iup.CENTER)
-									tcs.ui.cursubdlg = value[1]
-								end}, iup.label{title=value[2]}, alignment="ACENTER", gap=2 })
+								end}
+		
+		if not value[1] then figb.active="NO" end
+		iup.Append(mainv, iup.hbox{en, figb, iup.label{title=value[2]}, alignment="ACENTER", gap=2 })
 		init = true
 	end
 	
@@ -106,8 +108,7 @@ local function CreateTCSConfDlg()
 	end
 	local closebutton = iup.stationbutton{title="Close",action=function() 
 								HideDialog(maindlg)
-								tcs.ui.cursubdlg = OptionsDialog
-								ShowDialog(tcs.ui.cursubdlg, iup.CENTER, iup.CENTER)
+								ShowDialog(OptionsDialog,iup.CENTER, iup.CENTER)
 							end}
 	iup.Append(mainv, iup.hbox{iup.fill{}, closebutton, alignment="ACENTER",gap=2})
 	
