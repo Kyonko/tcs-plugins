@@ -49,8 +49,10 @@ end
 tcs.require("common")
 tcs.require("vo_clock")
 tcs.require("auto_nav")
+tcs.require("chain_fire")
 --[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
 tcs.ui = {}
+tcs.ui.enableb = {} --Table with references to all our stationtoggles that enable or disable plugins
 tcs.ui.configb = iup.stationbutton { title = "TCS Config",
 				hotkey = iup.K_t,
 				action=function()
@@ -86,6 +88,7 @@ local function CreateTCSConfDlg()
 		if not value then break end
 		if value[3] then
 			en = iup.stationtoggle{action=value[3],tip="Enable/Disable Plugin",value=value[3](en,-1)}
+			table.insert(tcs.ui.enableb, en)
 		else
 			en = iup.stationtoggle{action=function() end,tip="Enable/Disable Plugin",active="NO"}
 		end
@@ -127,6 +130,12 @@ local function CreateTCSConfDlg()
 	return maindlg
 end
 
+function tcs.ui.RefreshEnabled()
+	for _, toggle in ipairs(tcs.ui.enableb) do
+		toggle.value = toggle:action(-1)
+	end
+	iup.Refresh(tcs.ui.confdlg)
+end
 
---tcs.ProvideConfig("Test Button", OptionsDialog, "This is a bullshit test button.")
+--tcs.ProvideConfig("Test Button", OptionsDialog, "This is a bullshit test button.", this_can_be_enabled)
 tcs.ui.confdlg = CreateTCSConfDlg()

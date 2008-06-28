@@ -40,6 +40,7 @@ local verbt = iup.stationtoggle{action=function(_,v)
 									end
 									return
 								end}
+								
 
 function tcs.autonav.state(_,v)
 	if v == 1 then
@@ -58,7 +59,7 @@ local closeb = iup.stationbutton{title="Close",action=function()
 											ShowDialog(tcs.ui.confdlg,iup.CENTER, iup.CENTER)
 										end}
 local elem = {
-			iup.hbox{verbt, iup.fill{3}, iup.label{title="Notify when route is mapped"}},
+			iup.hbox{verbt, iup.fill{3}, iup.label{title="Check here to turn on verbose mode."}},
 			iup.hbox{iup.fill{},closeb}
 		}
 
@@ -67,4 +68,25 @@ function tcs.autonav.conf:init()
 	verbt.value = tcs.IntToToggleState(tcs.autonav.verbose)
 	return
 end
+
+
 tcs.ProvideConfig("Autonav", tcs.autonav.conf,"Plots a course to follow your target when they jump/warp.",tcs.autonav.state)
+
+
+--The commandline interface might be useful, dunno.
+local function stuff(unused, blah)
+     if not blah then print("Autonav's options are on and off") return end
+     local cmd = blah[1]:lower()
+     if cmd == "on" then
+	tcs.autonav.state(nil, 1)
+	if tcs.autonav.verbose == 1 then print("Autonav has been turned on.") end
+     elseif cmd == "off" then
+	tcs.autonav.state(nil, 0)
+	if tcs.autonav.verbose == 1 then print("Autonav has been turned off.") end
+     else
+	print("Acceptable options are on or off.")
+     end
+     tcs.ui.RefreshEnabled()
+end
+
+RegisterUserCommand("autonav", stuff)
