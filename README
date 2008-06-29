@@ -1,0 +1,27 @@
+This is the ToasterCrush Plugins Suite.
+
+Plugins contained in this pack: 
+AlertMachine 	- Displays text alerts when players enter or leave your current sector.
+
+AutoNav 	- Sets your next waypoint that of your target if they jump out of sector while in range.
+		    Useable through /autonav as well
+
+ChainFire	- Writes chainfire aliases for defined weapons groups
+
+MakeFriends	- Customizes how friends and enemies are displayed on your radar
+
+VOClock 	- Adds a clock to your PDA and HUD
+
+
+All configuration options and helpfiles can be found in your VO Options menu under "TCS Config"
+
+
+INSTALLATION: 
+Place this folder(tcs-plugins) into VO plugins directory(vendetta/plugins) and either use /lua ReloadInterface() or restart your client.
+
+Credits:
+Written by Scuba Steve 9.0. 
+Improvements and fixes in AutoNav written by Mad Miner Moda. 
+Thanks to Eonis Jannar, Miharu, and Raybondo for their contributions to MakeFriends.
+
+Also thanks to users of this set of plugins, as well as those who kept it hobbling along from Oct 30 2007 to June 29 2008.
