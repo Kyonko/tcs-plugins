@@ -191,7 +191,7 @@ function tcs.alm.print(report_type, charid, new)
 		elseif s == "%ship%" then
 			return tcs.alm.cache[charid].player_ship
 			elseif s == "%tag%" then
-			if tcs.alm.cache[charid].guild_tag ~= "" then
+			if tcs.alm.cache[charid].guild_tag and tcs.alm.cache[charid].guild_tag ~= "" then
 				if tcs.alm.colorplayername == 1 then
 					return "\127"..tcs.GetFactionColor(GetPlayerFaction(charid)).."["..tcs.alm.cache[charid].guild_tag.."]".."\127"..tcs.alm.textcolor
 				else
@@ -261,7 +261,7 @@ function tcs.alm.PlayerUpdate(charid)
 	local player_name = GetPlayerName(charid)
 	local player_faction = GetPlayerFaction(charid)
 
-	local guild_tag = GetGuildTag(charid)
+	local guild_tag = GetGuildTag(charid) or ""
 	local itani_standing = GetPlayerFactionStanding(1, charid)
 	local serco_standing = GetPlayerFactionStanding(2, charid)
 	local uit_standing = GetPlayerFactionStanding(3, charid)
