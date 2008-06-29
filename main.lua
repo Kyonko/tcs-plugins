@@ -7,7 +7,7 @@ Copyright Tyler Gibbons(Scuba Steve 9.0), 2008. Feel free to use, distribute, an
 	using this code, I'd love to know. Send me a message on IRC, though you'll have to message Miharu first to figure out 
 	name I'm currently using.
 
-This file is the main loader for the rest of the plugins. It also loads common functions used by several plugins.
+This file is the main loader for the plugin modules. It also loads common functions used by several plugins.
 Furthermore, it provides a configuration interface for the whole of the plugin suite.
 --]]
 
@@ -37,6 +37,7 @@ function tcs.require(libstring)
 	local file = nil
 
 	for path in string.gmatch(tcs.LUA_PATH, "[^;]+") do
+		if libstring == "ui" then console_print(path) end
 		file, err = loadfile(string.gsub(path, "?", libstring))
 		if(file) then break end
 	end
@@ -50,6 +51,7 @@ tcs.require("common")
 tcs.require("alert_machine")
 tcs.require("auto_nav")
 tcs.require("chain_fire")
+tcs.require("make_friends")
 tcs.require("vo_clock")
 --[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
 tcs.ui = {}

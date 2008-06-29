@@ -1,4 +1,5 @@
---THIS IS THE ALERTMACHINE. IT IS A MACHINE THAT ALERTS.
+--THIS IS THE ALERTMACHINE MODULE. IT IS A MACHINE MODULE THAT ALERTS.
+--MODULE MODULE MODULE
 
 tcs.alm = {}
 tcs.alm.cache = {}
@@ -14,7 +15,7 @@ local function init()
 		inrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.inrange", "%tag%%char%: %ship% - %hp%%% health %dist%m away\n%standings%")),
 		outrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.outrange", "%tag%%char%: Out of range.")),
 		leftrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.leftrange", "%tag%%char%: Left radar range.")),
-		enteredrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.enteredrange", "%tag%%char%: Entered radar range.")),
+		enteredrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.enteredrange", "%tag%%char%: Entered radar range. Is at %hp%%% health and is %dist%m away.")),
 		left = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.left", "%tag%%char%: Left the sector.")),
 		updatest = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatest","%tag%%char%: New standings: %standings%")),
 		updateguj = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updateguj","%tag%%char% has joined %tag%.")),
@@ -139,7 +140,7 @@ function tcs.alm.print(report_type, charid, new)
 				output = tcs.alm.format.inrange
 				tcs.alm.cache[charid].entered = true
 				tcs.alm.cache[charid].notif = true
-			elseif new.inrange then
+			elseif new.range then
 				output = tcs.alm.format.enteredrange
 			elseif new.ship then
 				output = tcs.alm.format.updatesh
@@ -151,11 +152,11 @@ function tcs.alm.print(report_type, charid, new)
 				output = tcs.alm.format.outrange
 				tcs.alm.cache[charid].entered = false
 				tcs.alm.cache[charid].notif = true
-			elseif new.inrange then
+			elseif new.range then
 				output = tcs.alm.format.leftrange
 			end
 		end
-	end
+	end 
 --[[ Formatting bits
 	%%  			-- %
 	%char %			-- Character name
@@ -229,7 +230,7 @@ function tcs.alm:OnEvent(event, charid)
 		end
 		if charid == 0 then return end
 		--Report a character leaving
-		tcs.alm.print("left",tcs.alm.cache[charid])
+		tcs.alm.print("left",charid,{})
 		tcs.alm.cache[charid] = nil
 		
 	end
@@ -253,7 +254,10 @@ function tcs.alm.PlayerUpdate(charid)
 	if not tcs.alm.cache[charid] then return end  --Why are we updating someone not in the cache?
 	local player_ship = GetPrimaryShipNameOfPlayer(charid)	
 	if not player_ship then return end
-	local new = {}
+	local new = {	range = false,
+				standing = false,
+				guild = false,
+				ship = false}
 	local player_name = GetPlayerName(charid)
 	local player_faction = GetPlayerFaction(charid)
 
@@ -262,11 +266,11 @@ function tcs.alm.PlayerUpdate(charid)
 	local serco_standing = GetPlayerFactionStanding(2, charid)
 	local uit_standing = GetPlayerFactionStanding(3, charid)
 	local local_standing = GetPlayerFactionStanding("sector", charid)
-	local inrange = true
+	local inrange = false
 	
 	if tcs.StringAtStart(tcs.alm.cache[charid].player_name, "(readi") == true then tcs.alm.cache[charid].player_name = player_name; return end
 	
-	if GetPlayerHealth(charid) == -1 then inrange = false end
+	if GetPlayerHealth(charid) ~= -1 then inrange = true end
 	if player_ship ~= tcs.alm.cache[charid].player_ship then
 		tcs.alm.cache[charid].player_ship = player_ship
 		new.ship = true
@@ -278,21 +282,24 @@ function tcs.alm.PlayerUpdate(charid)
 	end
 	
 	if inrange ~= tcs.alm.cache[charid].inrange then
-		tcs.alm.cache[charid].inrange = inrange
 		new.range = true
+		tcs.alm.cache[charid].inrange = inrange
 	end
 	
 	if itani_standing ~= tcs.alm.cache[charid].itani_standing or serco_standing ~= tcs.alm.cache[charid].serco_standing or uit_standing ~= tcs.alm.cache[charid].uit_standing or local_standing ~= tcs.alm.cache[charid].local_standing then
-		if factionfriendlyness(GetPlayerFactionStanding(1, charid)) == "Unknown" then return end
-		tcs.alm.cache[charid].itani_standing = itani_standing
-		tcs.alm.cache[charid].serco_standing = serco_standing
-		tcs.alm.cache[charid].uit_standing = uit_standing
-		tcs.alm.cache[charid].local_standing = local_standing
-		new.standing = true
+		if factionfriendlyness(GetPlayerFactionStanding(1, charid)) ~= "Unknown" then
+			tcs.alm.cache[charid].itani_standing = itani_standing
+			tcs.alm.cache[charid].serco_standing = serco_standing
+			tcs.alm.cache[charid].uit_standing = uit_standing
+			tcs.alm.cache[charid].local_standing = local_standing
+			new.standing = true
+		end
 	end
 	
+
+	
 	--Do nothing if there is nothing to update
-	if tcs.alm.cache[charid].entered and not new.standing and not new.range and not new.guild and not new.ship then return end
+	if (not new.standing) and (not new.range) and (not new.guild) and (not new.ship) then return end
 	tcs.alm.print("update", charid, new)
 	return
 end
