@@ -22,6 +22,16 @@ function tcs.ConfigConstructor(title, elements, maindlgops)
 	return maindlg
 end
 
+function tcs.factionfriendlynesscolor(standing)
+	if(standing == 0) then
+		return "255 0 0"
+	end
+	return factionfriendlynesscolor(standing)
+end
+
+function tcs.GetFactionColor(faction)
+	return tcs.RGBToHex(FactionColor_RGB[faction])
+end
 
 --Recursively nabs a parent. Negatives kidnap children.
 --iuphand needs to be a valid iup handle
@@ -54,8 +64,28 @@ function tcs.ProvideConfig(plugname, conf_if, shortdesc, state_func)
 	tcs.PROVIDED[plugname] = { conf_if, shortdesc, state_func}
 end
 
+--Colorful functions. 
+function tcs.RGBToHex(rgb)
+	local rgb2 = {}
+	if (not rgb) then return "DDDDDD" end
+	for component in string.gmatch(rgb, "%d+") do
+		table.insert(rgb2, component)
+	end 
+   	local hex = string.format("%.2x%.2x%.2x", rgb2[1], rgb2[2], rgb2[3])
+	return hex
+end 
+
+function tcs.StringAtStart(haystack, needle)
+	if not haystack or not needle then return end
+	return (string.sub(haystack, 1, string.len(needle)) == needle)
+end
+
 function tcs.ToggleStateToInt(state) 
 	if state == "ON" then return 1 end
 	return 0
 end
 
+--DELETE ME
+function tcs.test(plugin)
+	printtable({loadfile("plugins/tcs-plugins/"..plugin.."/main.lua")})
+end

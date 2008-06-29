@@ -47,9 +47,10 @@ function tcs.require(libstring)
 end
 --[[---------------------------------------------------------------------------LOADED PLUGINS-------------------------------------------------------------------------------]]
 tcs.require("common")
-tcs.require("vo_clock")
+tcs.require("alert_machine")
 tcs.require("auto_nav")
 tcs.require("chain_fire")
+tcs.require("vo_clock")
 --[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
 tcs.ui = {}
 tcs.ui.enableb = {} --Table with references to all our stationtoggles that enable or disable plugins
@@ -75,6 +76,9 @@ function tcs.ui.InsertOption(confb)
 end
 
 tcs.ui.InsertOption(tcs.ui.configb)					--Adds our config button. A button that opens the menu.
+
+local function SizeAdjustment()
+end
 
 local function CreateTCSConfDlg()
 	local mainv = iup.vbox{
