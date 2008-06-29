@@ -335,6 +335,8 @@ RegisterEvent(tcs.alm.test, "UPDATE_CHARINFO")]]
 local inrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.inrange),size="350x"}
 local outrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.outrange),size="350x"}
 local left = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.left),size="350x"}
+local enteredrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.enteredrange),size="350x"}
+local leftrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.leftrange),size="350x"}
 local updatest = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.updatest),size="350x"}
 local standing = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.standing),size="350x"}
 local textcolor = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.textcolor),size="40x"}
@@ -349,6 +351,10 @@ local function OpenHelp()
 The box labeled "In Range:" formats the message received when a player enters the sector in range of you, or enters your radar range for the first time.
 
 "Out of Range:" controls the message received when a player enters the sector out of your radar range.
+
+"Entered Range:" sets the message displayed when a player enters radar range.
+
+"Left Range:" changes the message printed when a player leaves radar range.
 
 "Left Sector:" is the same for when players leave the sector.
 
@@ -387,6 +393,8 @@ local closeb = iup.stationbutton{title="OK", action=function()
 											gkini.WriteString("tcs", "alm.inrange", tcs.EscapeSpecialChars(inrange.value))
 											gkini.WriteString("tcs", "alm.outrange", tcs.EscapeSpecialChars(outrange.value))
 											gkini.WriteString("tcs", "alm.left", tcs.EscapeSpecialChars(left.value))
+											gkini.WriteString("tcs", "alm.enteredrange", tcs.EscapeSpecialChars(enteredrange.value))
+											gkini.WriteString("tcs", "alm.leftrange", tcs.EscapeSpecialChars(leftrange.value))
 											gkini.WriteString("tcs", "alm.updatest", tcs.EscapeSpecialChars(updatest.value))
 											gkini.WriteString("tcs", "alm.standing", tcs.EscapeSpecialChars(standing.value))
 											gkini.WriteString("tcs", "alm.textcolor", tcs.EscapeSpecialChars(textcolor.value))
@@ -407,6 +415,8 @@ local helpclose = iup.hbox{iup.stationbutton{title="Help", hotkey=iup.K_h, actio
 local mainv = {
 	iup.hbox{iup.label{title="In Range: "},iup.fill{},inrange},
 	iup.hbox{iup.label{title="Out of Range: "},iup.fill{},outrange},
+	iup.hbox{iup.label{title="Entered Range: "},iup.fill{},enteredrange},
+	iup.hbox{iup.label{title="Left Range: "},iup.fill{},leftrange},
 	iup.hbox{iup.label{title="Left Sector: "},iup.fill{},left},
 	iup.hbox{iup.label{title="New Standings: "},iup.fill{},updatest},
 	iup.hbox{iup.label{title="%standings% Format: "},iup.fill{},standing},
@@ -449,6 +459,8 @@ function tcs.alm.confdlg:init()
 	init()
 	inrange.value = tcs.EscapeSpecialChars(tcs.alm.format.inrange)
 	outrange.value = tcs.EscapeSpecialChars(tcs.alm.format.outrange)
+	leftrange.value = tcs.EscapeSpecialChars(tcs.alm.format.leftrange)
+	enteredrange.value = tcs.EscapeSpecialChars(tcs.alm.format.enteredrange)
 	left.value = tcs.EscapeSpecialChars(tcs.alm.format.left)
 	updatest.value = tcs.EscapeSpecialChars(tcs.alm.format.updatest)
 	standing.value = tcs.EscapeSpecialChars(tcs.alm.format.standing)
