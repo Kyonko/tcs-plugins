@@ -53,13 +53,29 @@ tcs.require("chain_fire")
 tcs.require("vo_clock")
 --[[----------------------------------------------------------------------PLUGIN UI STARTS HERE------------------------------------------------------------------------]]
 tcs.ui = {}
-tcs.ui.enableb = {} --Table with references to all our stationtoggles that enable or disable plugins
+tcs.ui.configbs = {}
+tcs.ui.enableb = {} 	--Table with references to all our stationtoggles that enable or disable plugins
+
+local function SizeAdjustment(configbs)
+	local biggest = 0
+	for _, value in pairs(configbs) do
+		if tonumber(value.w) > biggest then
+			biggest = tonumber(value.w)
+		end
+	end
+	
+	for _, value in pairs(configbs) do
+		value.size = biggest
+	end
+end
 tcs.ui.configb = iup.stationbutton { title = "TCS Config",
 				hotkey = iup.K_t,
 				action=function()
 					HideDialog(OptionsDialog)
 					--tcs.ui.confdlg:setup()
 					ShowDialog(tcs.ui.confdlg, iup.CENTER, iup.CENTER)
+					SizeAdjustment(tcs.ui.configbs)
+					iup.Refresh(tcs.ui.confdlg)
 				end}
 
 function tcs.ui.InsertOption(confb)
@@ -76,9 +92,6 @@ function tcs.ui.InsertOption(confb)
 end
 
 tcs.ui.InsertOption(tcs.ui.configb)					--Adds our config button. A button that opens the menu.
-
-local function SizeAdjustment()
-end
 
 local function CreateTCSConfDlg()
 	local mainv = iup.vbox{
@@ -106,6 +119,7 @@ local function CreateTCSConfDlg()
 								end}
 		
 		if not value[1] then figb.active="NO" end
+		table.insert(tcs.ui.configbs, figb)
 		iup.Append(mainv, iup.hbox{en, figb, iup.label{title=value[2]}, alignment="ACENTER", gap=2 })
 		init = true
 	end

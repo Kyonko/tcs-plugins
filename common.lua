@@ -22,6 +22,24 @@ function tcs.ConfigConstructor(title, elements, maindlgops)
 	return maindlg
 end
 
+function tcs.EscapeSpecialChars(str)
+	if not str then return end
+	return string.gsub(str, "(%c)", {	['\n'] = "\\n",
+							['\t'] = "\\t",
+							['\v']  = "\\v",
+							['\b']  = "\\b",
+							['\r']  = "\\r",
+							['\f']  = "\\f",
+							['\a']  = "\\a",
+							['\\']  = "\\\\",
+							['\?']  = "\\?",
+							['\'']  = "\\\'",
+							['\"']  = "\\\""}
+							--function(s)
+							--	return string.format("\%c", string.byte(s))
+							)
+end
+
 function tcs.factionfriendlynesscolor(standing)
 	if(standing == 0) then
 		return "255 0 0"
@@ -83,6 +101,22 @@ end
 function tcs.ToggleStateToInt(state) 
 	if state == "ON" then return 1 end
 	return 0
+end
+
+function tcs.UnescapeSpecialChars(str)
+	if not str then return end
+	return string.gsub(str, "\\.", {	["\\n"] = "\n",
+							["\\t"] = "\t",
+							["\\v"]  = "\v",
+							["\\b"]  = "\\b",
+							["\\r"]  = "\r",
+							["\\f"]  = "\f",
+							["\\a"]  = "\a",
+							["\\\\"]  = "\\",
+							["\\\?"]  = "\?",
+							["\\\'"]  = "\'",
+							["\\\""]  = "\""})
+						
 end
 
 --DELETE ME

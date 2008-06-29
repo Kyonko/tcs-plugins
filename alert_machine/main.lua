@@ -1,28 +1,30 @@
 --THIS IS THE ALERTMACHINE. IT IS A MACHINE THAT ALERTS.
 
 tcs.alm = {}
-tcs.alm.state = gkini.ReadInt("tcs", "alm.state", 1)
-tcs.alm.usefactioncolors = gkini.ReadInt("tcs", "alm.usefactioncolors", 1)
-tcs.alm.usestandingcolors = gkini.ReadInt("tcs", "alm.usestandingcolors", 1)
-tcs.alm.colorplayername = gkini.ReadInt("tcs", "alm.colorplayername", 1)
-tcs.alm.textcolor = gkini.ReadString("tcs", "alm.textcolor", "ba70d6")
-tcs.alm.timeout = 2
 tcs.alm.cache = {}
-tcs.local_alignment = 1 --Number indicating which faction current space is aligned to
 
-tcs.alm.format = {
-	inrange = gkini.ReadString("tcs", "alm.inrange", "%tag%%char%: %ship% - %hp%%% health %dist%m away\n%standings%"),
-	outrange = gkini.ReadString("tcs", "alm.outrange", "%tag%%char%: Out of range."),
-	leftrange = gkini.ReadString("tcs", "alm.leftrange", "%tag%%char%: Left radar range."),
-	enteredrange = gkini.ReadString("tcs", "alm.enteredrange", "%tag%%char%: Entered radar range."),
-	left = gkini.ReadString("tcs", "alm.left", "%tag%%char%: Left the sector."),
-	updatest = gkini.ReadString("tcs", "alm.updatest","%tag%%char%: New standings - %standings%"),
-	updateguj = gkini.ReadString("tcs", "alm.updateguj","%tag%%char% has joined %tag%."),
-	updategul	= gkini.ReadString("tcs", "alm.updategul","%char% has left their guild."),
-	updatesh = gkini.ReadString("tcs", "alm.updatesh","%tag%%char: Has switched ships to the %ship%"),
-	standing = gkini.ReadString("tcs", "alm.standing", "%faction%:%standing%")
-}
+local function init()
+	tcs.alm.state = gkini.ReadInt("tcs", "alm.state", 1)
+	tcs.alm.usefactioncolors = gkini.ReadInt("tcs", "alm.usefactioncolors", 1)
+	tcs.alm.usestandingcolors = gkini.ReadInt("tcs", "alm.usestandingcolors", 1)
+	tcs.alm.colorplayername = gkini.ReadInt("tcs", "alm.colorplayername", 1)
+	tcs.alm.textcolor = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.textcolor", "ba70d6"))
 
+	tcs.alm.format = {
+		inrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.inrange", "%tag%%char%: %ship% - %hp%%% health %dist%m away\n%standings%")),
+		outrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.outrange", "%tag%%char%: Out of range.")),
+		leftrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.leftrange", "%tag%%char%: Left radar range.")),
+		enteredrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.enteredrange", "%tag%%char%: Entered radar range.")),
+		left = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.left", "%tag%%char%: Left the sector.")),
+		updatest = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatest","%tag%%char%: New standings: %standings%")),
+		updateguj = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updateguj","%tag%%char% has joined %tag%.")),
+		updategul	= tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updategul","%char% has left their guild.")),
+		updatesh = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatesh","%tag%%char%: Has switched ships to the %ship%")),
+		standing = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.standing", "%faction%:%standing%"))
+	}
+end
+
+init()
 
 
 --Formats and prints alerts according to settings and data given.
@@ -319,3 +321,134 @@ end
 RegisterEvent(tcs.alm.test, "PLAYER_ENTERED_SECTOR")
 RegisterEvent(tcs.alm.test, "PLAYER_LEFT_SECTOR")
 RegisterEvent(tcs.alm.test, "UPDATE_CHARINFO")]]
+
+--[[-----------------------------------------Configuration Interface-------------------------------------------]]
+
+
+local inrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.inrange),size="350x"}
+local outrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.outrange),size="350x"}
+local left = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.left),size="350x"}
+local updatest = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.updatest),size="350x"}
+local standing = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.standing),size="350x"}
+local textcolor = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.textcolor),size="40x"}
+local usefactioncolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usefactioncolors)}
+local usestandingcolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usestandingcolors)}
+local colorplayername = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.colorplayername)}
+
+local function OpenHelp()
+	StationHelpDialog:Open(
+	[[Here you can adjust how and what AlertMachine reports to you. Each option controls various aspects of AlertMachine's reporting mechanism.
+
+The box labeled "In Range:" formats the message received when a player enters the sector in range of you, or enters your radar range for the first time.
+
+"Out of Range:" controls the message received when a player enters the sector out of your radar range.
+
+"Left Sector:" is the same for when players leave the sector.
+
+"New Standings:" modifies the message displayed when someone's standings are updated within radar range.
+
+"%standings% Format:" is the format of the %standings% variable. By default it's %faction%: %standing%
+
+"Text Color:" controls the normal text color of the reported message
+
+If any of the format blocks are empty, that message won't be displayed. The format blocks accept the following variables:
+	%%  				-- %
+	%char%			-- Character name
+	%dist%			-- Distance
+	%hp% 				-- Hull percentage
+	%ship%			-- Current ship
+	%tag% 			-- Guild tag
+	%standings%		-- Standing block
+	%I%,%S%,%U%,%L% 		-- Colorized Faction indicators (Itani, Serco, UIT, Local respectively)
+	%is%,%ss%,%us%,%ls% 	-- Standing level indicators. 
+	\n 				-- Newline
+	\t				-- Tab
+
+For example: 
+	In Range: %char% is in a %ship%. The jerk has %hp%%%HP and is %dist%m away.\\nTheir standings are %standings%
+	and
+	%standings% Format: %L% = %ls%
+	
+	Would display:
+		That Guy is in a Serco Prometheus. The jerk has 29%HP and is 10m away.
+		Their standings are L = Kill on Sight
+]])
+end
+
+local closeb = iup.stationbutton{title="OK", action=function()
+											HideDialog(tcs.alm.confdlg)
+											gkini.WriteString("tcs", "alm.inrange", tcs.EscapeSpecialChars(inrange.value))
+											gkini.WriteString("tcs", "alm.outrange", tcs.EscapeSpecialChars(outrange.value))
+											gkini.WriteString("tcs", "alm.left", tcs.EscapeSpecialChars(left.value))
+											gkini.WriteString("tcs", "alm.updatest", tcs.EscapeSpecialChars(updatest.value))
+											gkini.WriteString("tcs", "alm.standing", tcs.EscapeSpecialChars(standing.value))
+											gkini.WriteString("tcs", "alm.textcolor", tcs.EscapeSpecialChars(textcolor.value))
+											gkini.WriteInt("tcs", "alm.usefactioncolors", tcs.ToggleStateToInt(usefactioncolors.value))
+											gkini.WriteInt("tcs", "alm.usestandingcolors", tcs.ToggleStateToInt(usestandingcolors.value))
+											gkini.WriteInt("tcs", "alm.colorplayername", tcs.ToggleStateToInt(colorplayername.value))
+											init()
+											ShowDialog(tcs.ui.confdlg)
+										end}
+local cancelb = iup.stationbutton{title="Cancel", action=function()
+											HideDialog(tcs.alm.confdlg)
+											tcs.alm.confdlg:init()
+											ShowDialog(tcs.ui.confdlg)
+										end}
+										
+local helpclose = iup.hbox{iup.stationbutton{title="Help", hotkey=iup.K_h, action=function() OpenHelp() end}, iup.fill{}, closeb, cancelb}
+
+local mainv = {
+	iup.hbox{iup.label{title="In Range: "},iup.fill{},inrange},
+	iup.hbox{iup.label{title="Out of Range: "},iup.fill{},outrange},
+	iup.hbox{iup.label{title="Left Sector: "},iup.fill{},left},
+	iup.hbox{iup.label{title="New Standings: "},iup.fill{},updatest},
+	iup.hbox{iup.label{title="%standings% Format: "},iup.fill{},standing},
+	iup.hbox{},
+	iup.hbox{
+		iup.vbox{
+			iup.hbox{usefactioncolors, iup.label{title="Color Faction Names?"}},
+			iup.hbox{colorplayername, iup.label{title="Color Player Names?"}}
+		},
+		iup.fill{},
+		iup.vbox{
+			iup.hbox{usestandingcolors, iup.label{title="Color Faction Standings?"}}
+		},
+		iup.fill{},
+		iup.vbox{
+			iup.fill{},
+			iup.hbox{
+				iup.label{title="Text Color: "},
+				textcolor
+			}
+		}
+	},
+	iup.fill{},
+	helpclose
+}										
+
+tcs.alm.confdlg = tcs.ConfigConstructor("AlertMachine Config", mainv, {defaultesc = cancelb})
+tcs.ProvideConfig("AlertMachine", tcs.alm.confdlg, "Sends text alerts regarding other players in sector.", function(_,v) 
+																				if v == 1 then
+																					tcs.alm.state = 1
+																					gkini.WriteInt("tcs", "alm.state", 1)
+																				elseif v == 0 then
+																					tcs.alm.state = 0
+																					gkini.WriteInt("tcs", "alm.state", 0)
+																				elseif v == -1 then
+																					return tcs.IntToToggleState(tcs.alm.state)
+																				end
+																			end)
+function tcs.alm.confdlg:init()
+	init()
+	inrange.value = tcs.EscapeSpecialChars(tcs.alm.format.inrange)
+	outrange.value = tcs.EscapeSpecialChars(tcs.alm.format.outrange)
+	left.value = tcs.EscapeSpecialChars(tcs.alm.format.left)
+	updatest.value = tcs.EscapeSpecialChars(tcs.alm.format.updatest)
+	standing.value = tcs.EscapeSpecialChars(tcs.alm.format.standing)
+	textcolor.value = tcs.EscapeSpecialChars(tcs.alm.textcolor)
+	
+	usefactioncolors.value = tcs.IntToToggleState(tcs.alm.usefactioncolors)
+	usestandingcolors.value = tcs.IntToToggleState(tcs.alm.usestandingcolors)
+	colorplayername.value = tcs.IntToToggleState(tcs.alm.colorplayername)
+	
+end
