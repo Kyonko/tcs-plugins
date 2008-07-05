@@ -5,6 +5,7 @@ AlertMachine 	- Displays text alerts when players enter or leave your current se
 
 AutoNav 	- Sets your next waypoint that of your target if they jump out of sector while in range.
 		    Useable through /autonav as well
+CentralInfo	- Hijacks 3km distance meter to be something more useful in combat when you target another player
 
 ChainFire	- Writes chainfire aliases for defined weapons groups
 
