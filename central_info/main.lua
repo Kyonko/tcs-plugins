@@ -5,6 +5,9 @@ tcs.central = {}
 tcs.central.state = gkini.ReadInt("tcs", "central.state", 0)
 
 local distanceindicator = tcs.GetRelative(HUD.distancetext, 1)
+if not FlashIntensity then
+	declare("FlashIntensity", gkini.ReadInt("Vendetta", "flashintensity", 100)/100)
+end
 
 function tcs.central.update()
 	local self = HUD
