@@ -5,6 +5,9 @@ tcs.central = {}
 tcs.central.state = gkini.ReadInt("tcs", "central.state", 0)
 
 local distanceindicator = tcs.GetRelative(HUD.distancetext, 1)
+tcs.central.hull_percent = iup.label{title = "100%", alignment="ACENTER", expand="HORIZONTAL", fgcolor="14 153 202", font=Font.H4*HUD_SCALE}
+tcs.central.hull_percent_block = iup.vbox {iup.fill{}, tcs.central.hull_percent, visible = "YES", expand="VERTICAL"}
+iup.Append(tcs.GetSibling(HUD.distancetext, 1) , tcs.central.hull_percent_block)
 if not FlashIntensity then
 	declare("FlashIntensity", gkini.ReadInt("Vendetta", "flashintensity", 100)/100)
 end
@@ -24,6 +27,7 @@ function tcs.central.update()
 	self.locationtext.title = ShortLocationStr(GetCurrentSectorid())
 	self.sectoralignmenttext.title = (FactionName[GetSectorAlignment()] or "").."  "..(FactionMonitorStr[GetSectorMonitoredStatus()] or "")
 	local minjumpdist = GetMinJumpDistance()
+	tcs.central.hull_percent.visible = "NO"
 	--Sets turret HP
 	if parenthealth then
 		parenthealth = math.max(parenthealth, 0)
@@ -35,8 +39,10 @@ function tcs.central.update()
 	elseif health and tcs.central.state == 1 then 	--Change distance text to health value
 		self.jumpindicator.distance3000m.visible = "NO"
 		self.jumpindicator.distance_all.visible = "YES"
+		tcs.central.hull_percent.visible = "YES"
 		self.jumpindicator.distancebar.value = 3000 + health*3000
 		self.jumpindicator.distancebar.altvalue = 3000 - health*3000
+		tcs.central.hull_percent.title = tostring(math.ceil((health or 0)*100)).."%"
 		self.distancetext.title = string.format("%sm", comma_value(math.floor(distance or 0)))
 		if guild_tag and guild_tag ~= "" then guild_tag = "["..guild_tag.."]" end
 		self.locationtext.title = "\127"..tcs.GetFactionColor(factionid)..(guild_tag or "")..name
@@ -90,7 +96,7 @@ function tcs.central.update()
 			end
 			self.blood_flash.bgcolor = color.." 0 +"
 			self.blood_flash.visible = "YES"
-			FadeControl(self.blood_flash, 0.5, FlashIntensity, 0)
+			FadeControl(self.blood_flash, 0.5, FlashIntensity or 1, 0)
 		end
 	end
 end

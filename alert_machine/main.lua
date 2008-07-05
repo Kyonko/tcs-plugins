@@ -253,7 +253,7 @@ end
 function tcs.alm.PlayerUpdate(charid)
 	if not tcs.alm.cache[charid] then return end  --Why are we updating someone not in the cache?
 	local player_ship = GetPrimaryShipNameOfPlayer(charid)	
-	if not player_ship then return end
+	--if not player_ship then return end
 	local new = {	range = false,
 				standing = false,
 				guild = false,
@@ -271,7 +271,7 @@ function tcs.alm.PlayerUpdate(charid)
 	if tcs.StringAtStart(tcs.alm.cache[charid].player_name, "(readi") == true then tcs.alm.cache[charid].player_name = player_name; return end
 	
 	if GetPlayerHealth(charid) ~= -1 then inrange = true end
-	if player_ship ~= tcs.alm.cache[charid].player_ship then
+	if player_ship and player_ship ~= tcs.alm.cache[charid].player_ship then
 		tcs.alm.cache[charid].player_ship = player_ship
 		new.ship = true
 	end
@@ -299,7 +299,7 @@ function tcs.alm.PlayerUpdate(charid)
 
 	
 	--Do nothing if there is nothing to update
-	if (not new.standing) and (not new.range) and (not new.guild) and (not new.ship) then return end
+	--if (not new.standing) and (not new.range) and (not new.guild) and (not new.ship) then return end
 	tcs.alm.print("update", charid, new)
 	return
 end

@@ -12,7 +12,7 @@ Furthermore, it provides a configuration interface for the whole of the plugin s
 --]]
 
 declare("tcs", {})
-tcs.VERSION = "1.1.0"
+tcs.VERSION = "1.1.1"
 
 --[[ The all important require() function. This is responsible for checking which modules are loaded and
 loading the modules themselves if they need to be loaded. --]]
