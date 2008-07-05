@@ -12,8 +12,7 @@ Furthermore, it provides a configuration interface for the whole of the plugin s
 --]]
 
 declare("tcs", {})
-tcs.VERSION = "1.0.1"
-
+tcs.VERSION = "1.1.0"
 
 --[[ The all important require() function. This is responsible for checking which modules are loaded and
 loading the modules themselves if they need to be loaded. --]]
@@ -50,6 +49,7 @@ end
 tcs.require("common")
 tcs.require("alert_machine")
 tcs.require("auto_nav")
+tcs.require("central_info")
 tcs.require("chain_fire")
 tcs.require("make_friends")
 tcs.require("vo_clock")
@@ -133,7 +133,7 @@ local function CreateTCSConfDlg()
 								HideDialog(maindlg)
 								ShowDialog(OptionsDialog,iup.CENTER, iup.CENTER)
 							end}
-	iup.Append(mainv, iup.hbox{iup.fill{}, closebutton, alignment="ACENTER",gap=2})
+	iup.Append(mainv, iup.hbox{iup.label{title="v"..tcs.VERSION},iup.fill{}, closebutton, alignment="ACENTER",gap=2})
 	
 	maindlg = iup.dialog{
 		iup.stationhighopacityframe{

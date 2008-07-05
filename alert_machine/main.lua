@@ -119,7 +119,7 @@ end
 function tcs.alm.print(report_type, charid, new)
 	local health, distance, shield
 	if not tcs.alm.cache[charid] then return end
-	if tcs.alm.state ~= 1 or tcs.StringAtStart(tcs.alm.cache[charid].player_name, "*") or charid == 0 or charid == GetCharacterID() then return end
+	if tcs.alm.state ~= 1 or tcs.StringAtStart(tcs.alm.cache[charid].player_name, "*") or charid == 0 or charid == GetCharacterID() or tcs.StringAtStart(tcs.alm.cache[charid].player_name, "(readi") then return end
 	local output = ""
 	
 	if report_type == "left" then

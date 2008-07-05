@@ -1,5 +1,4 @@
 --Adds an ingame time readout to you PDA and HUD
-if not tcs then declare("tcs",{}) end
 tcs.clock = {}
  
 tcs.clock.color = gkini.ReadString("colors", "chatcolors.activechannel", "28b4f0")
