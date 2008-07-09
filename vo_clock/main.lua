@@ -69,7 +69,7 @@ end
  
 function tcs.clock:OnEvent()
 	tcs.clock.CreateTimeAreas(true)
-	tcs.clock.UpdateTimer:SetTimeout(1001 - tonumber(string.sub(gkmisc.GetGameTime(), 8)), function ()
+	tcs.clock.UpdateTimer:SetTimeout(1000 - math.fmod(gkmisc.GetGameTime(), 1000), function ()
 																				if(not pcall(tcs.clock.UpdateTimes)) then tcs.clock.CreateTimeAreas() end
 																				tcs.clock.UpdateTimer:SetTimeout(tcs.clock.freq)
 																			end)

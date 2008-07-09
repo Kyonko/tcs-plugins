@@ -1,4 +1,6 @@
 --TCS Common Library. Used to be Ufuncs.
+tcs.VERSION="1.1.3"
+
 
 function tcs.BoolToToggleState(b)
 	if b then return "ON" end
