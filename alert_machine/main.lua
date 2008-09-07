@@ -194,7 +194,7 @@ function tcs.alm.print(report_type, charid, new)
 			return tcs.alm.cache[charid].player_name
 		elseif s == "%mf%" then
 			if not health then return "" end
-			return "\127"..friendlycolor.."\1\127"..tcs.alm.textcolor
+			return "\127"..friendlycolor.."*\127"..tcs.alm.textcolor
 		elseif s == "%dist%" then
 			if tcs.alm.usedistcolors == 1 then
 				return "\127"..distcolor..distance.."\127"..tcs.alm.textcolor
@@ -406,7 +406,7 @@ If any of the format blocks are empty, that message won't be displayed. The form
 	\n 				-- Newline
 	\t				-- Tab
 
-The %mf% tag produces a small colored square indicating hostility based on MakeFriends. If MF isn't enabled, then it'll fallback on the default VO radar. This does not show when a player is out of range.
+The %mf% tag produces a colored asterisk indicating hostility based on MakeFriends. If MF isn't enabled, then it'll fallback on the default VO radar. This does not show when a player is out of range.
 	
 For example: 
 	In Range: %char% is in a %ship%. The jerk has %hp%%%HP and is %dist%m away.\\nTheir standings are %standings%
