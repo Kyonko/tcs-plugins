@@ -35,7 +35,6 @@ function tcs.require(libstring)
 	local file = nil
 
 	for path in string.gmatch(tcs.LUA_PATH, "[^;]+") do
-		if libstring == "ui" then console_print(path) end
 		file, err = loadfile(string.gsub(path, "?", libstring))
 		if(file) then break end
 	end

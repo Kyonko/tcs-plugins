@@ -9,24 +9,25 @@ local function init()
 	tcs.alm.usefactioncolors = gkini.ReadInt("tcs", "alm.usefactioncolors", 1)
 	tcs.alm.usestandingcolors = gkini.ReadInt("tcs", "alm.usestandingcolors", 1)
 	tcs.alm.colorplayername = gkini.ReadInt("tcs", "alm.colorplayername", 1)
+	tcs.alm.usehpcolors = gkini.ReadInt("tcs", "alm.usehpcolors", 1)
+	tcs.alm.usedistcolors = gkini.ReadInt("tcs", "alm.usedistcolors", 1)
 	tcs.alm.textcolor = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.textcolor", "ba70d6"))
 
 	tcs.alm.format = {
-		inrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.inrange", "%tag%%char%: %ship% - %hp%%% health %dist%m away\n%standings%")),
+		inrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.inrange", "%mf%%tag%%char%: %ship% - %hp%%% health %dist%m away :: %standings%")),
 		outrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.outrange", "%tag%%char%: Out of range.")),
 		leftrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.leftrange", "%tag%%char%: Left radar range.")),
-		enteredrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.enteredrange", "%tag%%char%: Entered radar range. Is at %hp%%% health and is %dist%m away.")),
+		enteredrange = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.enteredrange", "%mf%%tag%%char%: Entered radar range. Is at %hp%%% health and is %dist%m away.")),
 		left = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.left", "%tag%%char%: Left the sector.")),
-		updatest = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatest","%tag%%char%: New standings: %standings%")),
-		updateguj = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updateguj","%tag%%char% has joined %tag%.")),
-		updategul	= tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updategul","%char% has left their guild.")),
-		updatesh = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatesh","%tag%%char%: Has switched ships to the %ship%")),
+		updatest = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatest","%mf%%tag%%char%: New standings: %standings%")),
+		updateguj = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updateguj","%mf%%tag%%char% has joined %tag%.")),
+		updategul	= tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updategul","%mf%%char% has left their guild.")),
+		updatesh = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.updatesh","%mf%%tag%%char%: Has switched ships to the %ship%")),
 		standing = tcs.UnescapeSpecialChars(gkini.ReadString("tcs", "alm.standing", "%faction%:%standing%"))
 	}
 end
 
 init()
-
 
 --Formats and prints alerts according to settings and data given.
 --[[
@@ -57,7 +58,7 @@ new = {
 --[[
 General format stuff:
 	inrange: 
-		%tag%char: %ship - %hp%% hull %sp%% shield %distm away\n%standing
+		%tag%char: %ship - %hp%% hull %sp%% shield %distm away :: %standing
 	
 	outrange:
 		%tag%char: Out of range.
@@ -99,6 +100,7 @@ function tcs.alm.FormatStanding(charid)
 		ustand = string.gsub(ustand, "%%standing%%", factionfriendlyness(GetPlayerFactionStanding(3, charid)))
 	end
 	
+	
 	standing = istand.." "..sstand.." "..ustand
 	
 	if GetSectorMonitoredStatus() ~= 1 then
@@ -116,6 +118,9 @@ function tcs.alm.FormatStanding(charid)
 	end
 	return standing
 end
+
+
+
 function tcs.alm.print(report_type, charid, new)
 	local health, distance, shield
 	if not tcs.alm.cache[charid] then return end
@@ -133,9 +138,9 @@ function tcs.alm.print(report_type, charid, new)
 			end
 		end]]
 		if tcs.alm.cache[charid].inrange then
-			health = math.floor(GetPlayerHealth(charid) or 0)
+			health = math.ceil(GetPlayerHealth(charid) or 0)
 			shield = nil
-			distance = math.floor(GetPlayerDistance(charid) or 0)
+			distance = math.ceil(GetPlayerDistance(charid) or 0)
 			if not tcs.alm.cache[charid].entered then 
 				output = tcs.alm.format.inrange
 				tcs.alm.cache[charid].entered = true
@@ -158,11 +163,12 @@ function tcs.alm.print(report_type, charid, new)
 		end
 	end 
 --[[ Formatting bits
-	%%  			-- %
-	%char %			-- Character name
+	%%  				-- %
+	%mf%				-- MakeFriends hostility marker
+	%char%			-- Character name
 	%dist%			-- Distance
 	%hp% 			-- Hull percentage
-	%sp% 			-- Shield percentage
+	%sp% 				-- Shield percentage
 	%ship%			-- Current ship
 	%tag% 			-- Guild tag
 	%standing%		-- Standing block
@@ -175,16 +181,29 @@ function tcs.alm.print(report_type, charid, new)
 	local name = tcs.alm.cache[charid].player_name
 	local ship = tcs.alm.cache[charid].player_ship
 	local tag = tcs.alm.cache[charid].guild_tag
+	local hpcolor 
+	if tcs.alm.usehpcolors == 1 and health then hpcolor = tcs.CalcHPColor(health/100) end
+	local distcolor
+	if tcs.alm.usedistcolors == 1 and distance then distcolor = tcs.CalcDistColor(distance) end
+	local friendlycolor = tcs.RGBToHex(tcs.GetFriendlynessColor(charid))
 	local function format_output(s)
 		if s == "%char%" then
 			if tcs.alm.colorplayername == 1 then
 				return "\127"..tcs.GetFactionColor(GetPlayerFaction(charid))..tcs.alm.cache[charid].player_name.."\127"..tcs.alm.textcolor
-			else
-				return tcs.alm.cache[charid].player_name
 			end
+			return tcs.alm.cache[charid].player_name
+		elseif s == "%mf%" then
+			if not health then return "" end
+			return "\127"..friendlycolor.."\1\127"..tcs.alm.textcolor
 		elseif s == "%dist%" then
+			if tcs.alm.usedistcolors == 1 then
+				return "\127"..distcolor..distance.."\127"..tcs.alm.textcolor
+			end
 			return distance
 		elseif s == "%hp%" then
+			if tcs.alm.usehpcolors == 1 then
+				return "\127"..hpcolor..health.."\127"..tcs.alm.textcolor
+			end
 			return health
 		elseif s == "%sp%" then
 			return ""
@@ -194,12 +213,10 @@ function tcs.alm.print(report_type, charid, new)
 			if tcs.alm.cache[charid].guild_tag and tcs.alm.cache[charid].guild_tag ~= "" then
 				if tcs.alm.colorplayername == 1 then
 					return "\127"..tcs.GetFactionColor(GetPlayerFaction(charid)).."["..tcs.alm.cache[charid].guild_tag.."]".."\127"..tcs.alm.textcolor
-				else
-					return "["..tcs.alm.cache[charid].guild_tag.."]"
 				end
-			else
-				return ""
+				return "["..tcs.alm.cache[charid].guild_tag.."]"
 			end
+			return ""
 		elseif s == "%standings%" then
 			return standings
 		elseif s == "%%" then
@@ -267,6 +284,7 @@ function tcs.alm.PlayerUpdate(charid)
 	local uit_standing = GetPlayerFactionStanding(3, charid)
 	local local_standing = GetPlayerFactionStanding("sector", charid)
 	local inrange = false
+	local distance = nil
 	
 	if tcs.StringAtStart(tcs.alm.cache[charid].player_name, "(readi") == true then tcs.alm.cache[charid].player_name = player_name; return end
 	
@@ -300,14 +318,22 @@ function tcs.alm.PlayerUpdate(charid)
 	
 	--Do nothing if there is nothing to update
 	--if (not new.standing) and (not new.range) and (not new.guild) and (not new.ship) then return end
-	tcs.alm.print("update", charid, new)
-	return
+	--tcs.alm.print("update", charid, new)
+	return {charid=charid, new=new}
 end
 		
 function tcs.alm.cacheProcess()
-	if tcs.alm.state ~= 1 then return end
+	if tcs.alm.state ~= 1 or not GetCharacterID() then return end
+	local updates = {}
 	for key, value in pairs(tcs.alm.cache) do 
-		tcs.alm.PlayerUpdate(key)
+		table.insert(updates, tcs.alm.PlayerUpdate(key) or {})
+	end
+	local max_dist = GetMaxRadarDistance()
+	table.sort(updates, function(n, m) return (GetPlayerDistance(n.charid) or max_dist+1) > (GetPlayerDistance(m.charid) or max_dist+1) end) --Farther players are printed first, closer last.
+	for _, value in ipairs(updates) do
+		if value ~= {} then
+			tcs.alm.print("update", value.charid, value.new)
+		end
 	end
 end
 
@@ -343,6 +369,8 @@ local textcolor = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.textcolor),size=
 local usefactioncolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usefactioncolors)}
 local usestandingcolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usestandingcolors)}
 local colorplayername = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.colorplayername)}
+local usehpcolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usehpcolors)}
+local usedistcolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usedistcolors)}
 
 local function OpenHelp()
 	StationHelpDialog:Open(
@@ -366,6 +394,7 @@ The box labeled "In Range:" formats the message received when a player enters th
 
 If any of the format blocks are empty, that message won't be displayed. The format blocks accept the following variables:
 	%%  				-- %
+	%mf%				-- MF query
 	%char%			-- Character name
 	%dist%			-- Distance
 	%hp% 				-- Hull percentage
@@ -377,6 +406,8 @@ If any of the format blocks are empty, that message won't be displayed. The form
 	\n 				-- Newline
 	\t				-- Tab
 
+The %mf% tag produces a small colored square indicating hostility based on MakeFriends. If MF isn't enabled, then it'll fallback on the default VO radar. This does not show when a player is out of range.
+	
 For example: 
 	In Range: %char% is in a %ship%. The jerk has %hp%%%HP and is %dist%m away.\\nTheir standings are %standings%
 	and
@@ -401,6 +432,8 @@ local closeb = iup.stationbutton{title="OK", action=function()
 											gkini.WriteInt("tcs", "alm.usefactioncolors", tcs.ToggleStateToInt(usefactioncolors.value))
 											gkini.WriteInt("tcs", "alm.usestandingcolors", tcs.ToggleStateToInt(usestandingcolors.value))
 											gkini.WriteInt("tcs", "alm.colorplayername", tcs.ToggleStateToInt(colorplayername.value))
+											gkini.WriteInt("tcs", "alm.usehpcolors", tcs.ToggleStateToInt(usehpcolors.value))
+											gkini.WriteInt("tcs", "alm.usedistcolors", tcs.ToggleStateToInt(usedistcolors.value))
 											init()
 											ShowDialog(tcs.ui.confdlg)
 										end}
@@ -424,11 +457,13 @@ local mainv = {
 	iup.hbox{
 		iup.vbox{
 			iup.hbox{usefactioncolors, iup.label{title="Color Faction Names?"}},
-			iup.hbox{colorplayername, iup.label{title="Color Player Names?"}}
+			iup.hbox{colorplayername, iup.label{title="Color Player Names?"}},
+			iup.hbox{usedistcolors, iup.label{title="Color Distance Readout?"}}
 		},
 		iup.fill{},
 		iup.vbox{
-			iup.hbox{usestandingcolors, iup.label{title="Color Faction Standings?"}}
+			iup.hbox{usestandingcolors, iup.label{title="Color Faction Standings?"}},
+			iup.hbox{usehpcolors, iup.label{title="Color Player Hull Percentage?"}}
 		},
 		iup.fill{},
 		iup.vbox{
@@ -468,6 +503,8 @@ function tcs.alm.confdlg:init()
 	
 	usefactioncolors.value = tcs.IntToToggleState(tcs.alm.usefactioncolors)
 	usestandingcolors.value = tcs.IntToToggleState(tcs.alm.usestandingcolors)
+	usehpcolors.value = tcs.IntToToggleState(tcs.alm.usehpcolors)
+	usedistcolors.value = tcs.IntToToggleState(tcs.alm.usedistcolors)
 	colorplayername.value = tcs.IntToToggleState(tcs.alm.colorplayername)
 	
 end

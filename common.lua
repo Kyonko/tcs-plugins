@@ -1,11 +1,34 @@
 --TCS Common Library. Used to be Ufuncs.
-tcs.VERSION="1.1.3"
-
+tcs.VERSION = 1.2
 
 function tcs.BoolToToggleState(b)
 	if b then return "ON" end
 	return "OFF"
 end
+
+--Calculates distance color, returning a value between #444444 and #FFFFFF
+function tcs.CalcDistColor(dist)
+	local maxdist = GetMaxRadarDistance()
+	if dist > maxdist then dist = maxdist end
+	local c = math.ceil(-(dist-maxdist)/maxdist*187)+68
+	return string.format("%.2x%.2x%.2x", c, c, c)
+end
+	
+
+--Calculates the HP color, accepts a value in between 0 and 1
+function tcs.CalcHPColor(health)
+	if health < 0 then health = 0 end
+	local g = (1.25*health);	
+	local r = (8.0*(1.0 - health));
+	if g > 1 then g = 1 end
+	if r > 1 then r = 1 end
+	r = r*255 + 10
+	g = g*255 + 10
+	if r > 255 then r = 255 end
+	if g > 255 then g = 255 end
+	return string.format("%.2x%.2x10", r,g)
+end
+	
 
 --Compare everything in a case insensitive manner. How rude!
 function tcs.compare(a, b)
@@ -74,6 +97,13 @@ function tcs.GetFactionColor(faction)
 	return tcs.RGBToHex(FactionColor_RGB[faction])
 end
 
+function tcs.GetFriendlynessColor(charid)
+	if GetPlayerHealth(charid) == -1 then return nil end
+	local f = GetFriendlyStatus(charid)
+	if f == 3 then return "0 255 0" end
+	return "255 0 0"
+end
+
 --Accurately determines what the VALUE attribute of a list should be.
 function tcs.GetListSize(list)
 	local val = 0
@@ -127,6 +157,7 @@ function tcs.IsIntInTable(intable, int)
 	end
 	return false
 end
+
 
 --This function returns whether or not the sector is empty of other players. Takes no arguments.
 --It keeps a current list of all non-NPC players in the sector under tcs.current_players

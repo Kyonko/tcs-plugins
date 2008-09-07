@@ -182,17 +182,19 @@ function tcs.mf.SavePresets()
 end
 
 --Load settings in config.ini 
-tcs.mf.curpreset = gkini.ReadString("MakeFriends", "CurrentPreset", "Default")
-tcs.mf.LoadSettings(tcs.mf.curpreset)
 tcs.mf.OnCharacterSelect = {}
 function tcs.mf.OnCharacterSelect:OnEvent()
 	tcs.mf.LoadLists()
 	tcs.mf.LoadPresets()
+	tcs.mf.curpreset = gkini.ReadString("MakeFriends-"..GetPlayerName(), "CurrentPreset", "Default")
+	tcs.mf.LoadSettings(tcs.mf.curpreset)
 end
 RegisterEvent(tcs.mf.OnCharacterSelect, "PLAYER_ENTERED_GAME")
 if(GetPlayerName() ~= nil) then
 	tcs.mf.LoadLists()
 	tcs.mf.LoadPresets()
+	tcs.mf.curpreset = gkini.ReadString("MakeFriends-"..GetPlayerName(), "CurrentPreset", "Default")
+	tcs.mf.LoadSettings(tcs.mf.curpreset)
 end
 
 

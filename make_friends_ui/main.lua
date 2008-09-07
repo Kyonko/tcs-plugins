@@ -586,8 +586,9 @@ function tcs.mf.ui.savepresetokb:action()
 		tcs.mf.SavePresets()
 	end
 	tcs.mf.SaveSettings(name)
+	tcs.mf.curpreset = name
 	iup.SetAttribute(tcs.mf.ui.savepresetname, "VALUE", "")
-	gkini.WriteString("MakeFriends", "CurrentPreset", name)
+	gkini.WriteString("MakeFriends-"..GetPlayerName() or "", "CurrentPreset", name)
 	HideDialog(tcs.mf.ui.savepresetdlg)
 	iup.SetAttribute(tcs.mf.ui.dlg, "ACTIVE", "YES")
 end
@@ -618,7 +619,7 @@ function tcs.mf.ui.loadselectedpreset:action()
 		tcs.mf.LoadSettings(selpreset)
 	end
 	tcs.mf.GetFriends()
-	gkini.WriteString("MakeFriends", "CurrentPreset", selpreset)
+	gkini.WriteString("MakeFriends-"..GetPlayerName() or "", "CurrentPreset", selpreset)
 	HideDialog(tcs.mf.ui.presetsdlg)
 	iup.SetAttribute(tcs.mf.ui.dlg, "ACTIVE", "YES")
 end
