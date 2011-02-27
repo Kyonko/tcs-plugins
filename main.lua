@@ -193,7 +193,7 @@ local function CreateTCSConfDlg()
 			en = iup.stationtoggle{action=value.state_func,tip="Enable/Disable Plugin",value=value.state_func(en,-1)}
 			table.insert(tcs.ui.enableb, en)
 		else
-			en = iup.stationtoggle{action=function() end,tip="Enable/Disable Plugin",active="NO"}
+			en = iup.fill{size="17"}--iup.stationtoggle{action=function() end,tip="Enable/Disable Plugin",active="NO"}
 		end
 		local figb = iup.stationbutton{title=key,
 								action=function()
@@ -207,7 +207,7 @@ local function CreateTCSConfDlg()
 			value.dlg:init()
 		end
 		
-		if not valuedlg then figb.active="NO" end
+		if not value.dlg then figb.active="NO" end
 		table.insert(tcs.ui.configbs, figb)
 		iup.Append(mainv, iup.hbox{en, figb, iup.label{title=value.shortdesc}, alignment="ACENTER", gap=2 })
 		init = true
