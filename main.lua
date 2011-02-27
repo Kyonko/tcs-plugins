@@ -25,7 +25,7 @@ loading the modules themselves if they need to be loaded. --]]
 tcs._LOADED = { "tcs-plugins"}
 tcs.LUA_PATH = "?/main.lua;?/?;?/?.lua;?;?.lua;plugins/?/main.lua;plugins/?/?;plugins/?/?.lua;../?/?;../?/?.lua;../?/main.lua;"
 tcs.PROVIDED = {} 					--Table describing the plugins that have provided config interfaces.
-									--To add an interface, merely do tcs.ProvideConfig("plugin name", conf_handle, shortdesc[, state_func])
+									--To add an interface, merely do tcs.ProvideConfig("plugin name", conf_handle, shortdesc[, cli_cmd[, state_func]])
 									--When the plugins list is reloaded by the user, TCS will call conf_handle:on_refresh() if it exists.
 									--Conf handle should be an iup handle to the configuration window dialog
 									--If it exists, conf_handle:init() will be called ONCE ONLY, then conf_handle will be displayed via ShowDialog()
@@ -73,6 +73,7 @@ function load_libs()
 		"central_info",
 		"chain_fire",
 		"make_friends",
+		"multi_aim",
 		"vo_clock",
 		"misc"
 	}

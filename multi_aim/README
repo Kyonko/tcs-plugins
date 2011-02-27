@@ -1,0 +1,8 @@
+MultiAim:
+Creates separate autoaim reticules for every type of weapon your ship has equipped. Reticules are different colors and have pictures of the weapon they're matched with, so you can easily tell what's in position to be fired.
+
+Usage:
+/multiaim iconsize leadoff [x]: set the reticle size to x
+/multiaim iconsize addon [x]: set the addon picture size to x
+/multiaim visible leadoff [yes|no]: make the reticles visible or invisible
+/multiaim visible addon [yes|no]: make the addon pictures visible or invisible
