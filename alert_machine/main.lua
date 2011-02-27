@@ -365,7 +365,7 @@ local enteredrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.entere
 local leftrange = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.leftrange),size="350x"}
 local updatest = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.updatest),size="350x"}
 local standing = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.format.standing),size="350x"}
-local textcolor = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.textcolor),size="40x"}
+local textcolor = iup.text{value=tcs.EscapeSpecialChars(tcs.alm.textcolor),size="100x"}
 local usefactioncolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usefactioncolors)}
 local usestandingcolors = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.usestandingcolors)}
 local colorplayername = iup.stationtoggle{value=tcs.IntToToggleState(tcs.alm.colorplayername)}
