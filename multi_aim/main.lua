@@ -180,7 +180,6 @@ local closeb = iup.stationbutton{title="OK", action=function()
 										end}
 local cancelb = iup.stationbutton{title="Cancel", action=function()
 											HideDialog(tcs.multiaim.confdlg)
-											tcs.multiaim.confdlg:init()
 											tcs.cli_menu_adjust(plug_name)
 										end}
 
@@ -235,6 +234,7 @@ function ma_cli (_, data)
 					iup.Refresh(tcs.multiaim.leads[i].icon)
 				end
 				gkini.WriteString("tcs", "ma.LeadoffSize", data[3])
+				leadoff_size.value = data[3]
 			end
 		end
 		if(data[2] and data[2] == "addon") then
@@ -244,23 +244,29 @@ function ma_cli (_, data)
 					iup.Refresh(tcs.multiaim.leads[i].icon)
 				end
 				gkini.WriteString("tcs", "ma.AddonSize", data[3])
+				addonsize.value = data[3]
 			end
 		end
 	elseif(data[1] and data[1] == "visible") then
 		if(data[2] and data[2] == "leadoff") then
 			if(data[3]) then
+				showleadoff.value = (string.upper(data[3]) == "YES" and "YES") or "NO"
+				gkini.WriteString("tcs", "ma.LeadoffVisible", showleadoff.value)
 				for i = 2, 6 do
-					tcs.multiaim.leads[i].leadoff.visible = string.upper(data[3])
+					tcs.multiaim.leads[i].leadoff.visible = showleadoff.value
 				end
-				gkini.WriteString("tcs", "ma.LeadoffVisible", data[3])
+				
+				
 			end
 		end
 		if(data[2] and data[2] == "addon") then
 			if(data[3]) then
+				showaddon.value = (string.upper(data[3]) == "YES" and "YES") or "NO"
+				gkini.WriteString("tcs", "ma.AddonVisible", showaddon.value)
 				for i = 2, 6 do
-					tcs.multiaim.leads[i].addon.visible = string.upper(data[3])
+					tcs.multiaim.leads[i].addon.visible = showaddon.value
 				end
-				gkini.WriteString("tcs", "ma.AddonVisible", data[3])
+				
 			end
 		end
 	end
