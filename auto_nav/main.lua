@@ -1,6 +1,6 @@
 --tcs.autonav module. Original tcs.autonav code, Scuba Steve. 
 --Colorization improvements and simplification goes to Mad Miner Moda
-
+local name = "AutoNav"
 tcs.autonav = {}
 tcs.autonav.bold = '\127FFFFFF'
 tcs.autonav.follow = gkini.ReadInt('tcs','autonav.follow', 0)
@@ -56,7 +56,7 @@ function tcs.autonav.state(_,v)
 end
 local closeb = iup.stationbutton{title="Close",action=function() 
 											tcs.autonav.conf:hide()
-											ShowDialog(tcs.ui.confdlg,iup.CENTER, iup.CENTER)
+											tcs.cli_menu_adjust(name)
 										end}
 local elem = {
 			iup.hbox{verbt, iup.fill{3}, iup.label{title="Check here to turn on verbose mode."}},
@@ -69,8 +69,8 @@ function tcs.autonav.conf:init()
 	return
 end
 
-
-tcs.ProvideConfig("Autonav", tcs.autonav.conf,"Plots a course to follow your target when they jump/warp.",tcs.autonav.state)
+local cli_cmd = {cmd ="autonav", interp = function(input) stuff(nil, input) end}
+tcs.ProvideConfig(name, tcs.autonav.conf,"Plots a course to follow your target when they jump/warp.",cli_cmd,tcs.autonav.state)
 
 
 --The commandline interface might be useful, dunno.

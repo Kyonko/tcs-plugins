@@ -1,19 +1,55 @@
 --TCS Common Library. Used to be Ufuncs.
-tcs.VERSION = "1.2.1"
+tcs.VERSION = "1.4SUB1"
+
+--Declares and adds a whole bunch of controls to a host table for use by iup
+--Table entries should look like so:
+--While not generic enough, it does work on anything that has 'title' as a main attribute. Hence titled.
+-- "name" = {kind = "<iup control>", title = "This thingy"[,args={iup_arg = "arg", ...}]
+function tcs.BatchAddTitledControls(batch_struct, host_table) 
+	for name, attrib in pairs(batch_struct) do
+		local elem = iup[attrib.kind]{title=attrib.title}
+		local args = {}
+		if(attrib.args) then
+			for arg, val in pairs(attrib.args) do
+				table.insert(args, arg.."="..val)
+			end
+			iup.SetAttributes(elem, table.concat(args, ","))
+		end
+		host_table[name] = elem
+	end
+end
 
 function tcs.BoolToToggleState(b)
 	if b then return "ON" end
 	return "OFF"
 end
 
---Calculates distance color, returning a value between #444444 and #FFFFFF
+--Calculates distance color, returning a value between #313131 and #FFFFFF
 function tcs.CalcDistColor(dist)
 	local maxdist = GetMaxRadarDistance()
 	if dist > maxdist then dist = maxdist end
-	local c = math.ceil(-(dist-maxdist)/maxdist*187)+68
+	local c = math.ceil((maxdist-dist)/maxdist*206)+49
 	return string.format("%.2x%.2x%.2x", c, c, c)
 end
-	
+
+--Distance values for upper bound of color stages
+-- 0m -> DC_stage1 -> DC_stage2 -> Max Radar Range (5000m)
+tcs.DC_stage1 = 900
+tcs.DC_stage2 = 1700
+tcs.DC_stage3 = 3800
+function tcs.CalcStagedDistColor(dist)
+	local maxdist = tcs.DC_stage3 or GetMaxRadarDistance()
+	local stage1 = (tcs.DC_stage1 or 450)
+	local stage2 = math.abs((tcs.DC_stage2 or 1000) - stage1)
+	local stage3 = math.abs(maxdist - (stage2+stage1))
+	if dist > maxdist then dist = maxdist end
+	--Stage1 is first half, stage2 is the fourth after that, stage3 fills the rest
+	local c = 	((dist <= tcs.DC_stage1) and (math.ceil((tcs.DC_stage1-dist)/stage1*112)+125)) or 
+				((dist <= tcs.DC_stage2) and (math.ceil((tcs.DC_stage2-dist)/stage2*35)+90)) or 
+				(math.ceil((maxdist-dist)/stage3*40)+50) 
+	return string.format("%.2x%.2x%.2x", c, c, c)
+end
+				
 
 --Calculates the HP color, accepts a value in between 0 and 1
 function tcs.CalcHPColor(health)
@@ -27,6 +63,27 @@ function tcs.CalcHPColor(health)
 	if r > 255 then r = 255 end
 	if g > 255 then g = 255 end
 	return string.format("%.2x%.2x10", r,g)
+end
+
+--Slightly different from the main VO CalcPercentagesText bit
+function tcs.CalcPercentagesText_dull(health, shieldstrength)
+	if health < 0 then health = 0 end
+	--g and r vals reduced to .5 of original
+	local g = (.75*health);	
+	local r = (3.5*(1.0 - health));
+	if g > 1 then g = 1 end
+	if r > 1 then r = 1 end
+	health = math.ceil(health * 100)
+	r = (r*255) + 10
+	g = (g*255) + 10
+	if r > 255 then r = 255 end
+	if g > 255 then g = 255 end
+	local health_color = string.format("%.2x%.2x05", r,g)
+	if not shieldstrength or shieldstrength == 0 then
+		return string.format("\127%s(%d%%)",health_color,health)
+	end
+	shieldstrength = math.floor(shieldstrength * 100)
+	return string.format("\127%s(\127%s%d%%\127ffffff:\127%s%d%%)", health_color,targetshield_percentage_color,shieldstrength,health_color,health)
 end
 	
 
@@ -60,10 +117,7 @@ function tcs.ConfigConstructor(title, elements, maindlgops)
 	}
 	return maindlg
 end
-
-function tcs.EscapeSpecialChars(str)
-	if not str then return end
-	return string.gsub(str, "(%c)", {	['\n'] = "\\n",
+local special_chars = 	{	['\n'] = "\\n",
 							['\t'] = "\\t",
 							['\v']  = "\\v",
 							['\b']  = "\\b",
@@ -74,6 +128,9 @@ function tcs.EscapeSpecialChars(str)
 							['\?']  = "\\?",
 							['\'']  = "\\\'",
 							['\"']  = "\\\""}
+function tcs.EscapeSpecialChars(str)
+	if not str then return end
+	return string.gsub(str, "(%c)", special_chars
 							--function(s)
 							--	return string.format("\%c", string.byte(s))
 							)
@@ -202,6 +259,16 @@ function tcs.IsStringInTable(intable, fstring)
 	return false
 end
 
+--Converts our black/whitelists to maps to simplify comparisons. Uses ipairs
+function tcs.iListToMap(list)
+	--reset map
+	local map = {}
+	for dex, val in ipairs(list) do
+		map[string.lower(val)] = true
+	end
+	return map
+end
+
 --Moves the selected item in the iup list source to the iup list dest
 --If sel is specified, that is the item moved from source. If not, vo_listsel is used.
 function tcs.MoveSelectedListItem(source, dest, sel)
@@ -212,9 +279,32 @@ function tcs.MoveSelectedListItem(source, dest, sel)
 	tcs.PushListItem(dest, selitem)
 end
 
+--Tell TCS/main about our config menu and CLI(if present)
+function tcs.ProvideConfig(plugname, conf_if, shortdesc, cli_cmd, state_func)
+	if type(cli_cmd)=="function" then 
+		state_func = state_func or cli_cmd 
+		cli_cmd = nil 
+	elseif type(cli_cmd)=="table" then
+		tcs.COMMAND[cli_cmd.cmd] = cli_cmd.interp or false
+	end
+	tcs.PROVIDED[plugname] = { dlg=conf_if, shortdesc=shortdesc, cli_cmd = cli_cmd or {}, state_func=state_func}
+end
 
-function tcs.ProvideConfig(plugname, conf_if, shortdesc, state_func)
-	tcs.PROVIDED[plugname] = { conf_if, shortdesc, state_func}
+--Determines what to show after a dialog closes
+function tcs.cli_menu_adjust(name)
+	if not tcs.PROVIDED[name].cli then ShowDialog(tcs.ui.confdlg) 
+	else 
+		tcs.PROVIDED[name].cli = nil
+		local incap = GetCurrentStationType() == 1
+		local instation = PlayerInStation()
+		if incap then
+			ShowDialog()
+		elseif instation and not incap then 
+			ShowDialog(StationDialog)
+		elseif not (instation and incap) then
+			ShowDialog(HUD)
+		end
+	end
 end
 
 --Adds an item to the end of a iup list
@@ -225,7 +315,9 @@ function tcs.PushListItem(list, item)
 	list.value = newval
 end
 
-
+function tcs.RegisterHudScaleEvent(callback_table)
+	table.insert(tcs.e, callback_table)
+end
 
 --Removes the selected item from a list if sel is not specified
 --Otherwise, it removes the item at the value of vo_listsel(currently selected item)
@@ -279,9 +371,8 @@ function tcs.ToggleStateToBool(state)
 	return false
 end
 
-function tcs.UnescapeSpecialChars(str)
-	if not str then return end
-	return string.gsub(str, "\\.", {	["\\n"] = "\n",
+
+local unspecial_chars = {	["\\n"] = "\n",
 							["\\t"] = "\t",
 							["\\v"]  = "\v",
 							["\\b"]  = "\\b",
@@ -291,11 +382,9 @@ function tcs.UnescapeSpecialChars(str)
 							["\\\\"]  = "\\",
 							["\\\?"]  = "\?",
 							["\\\'"]  = "\'",
-							["\\\""]  = "\""})
+							["\\\""]  = "\""}
+function tcs.UnescapeSpecialChars(str)
+	if not str then return end
+	return string.gsub(str, "\\.", unspecial_chars)
 						
-end
-
---DELETE ME
-function tcs.test(plugin)
-	printtable({loadfile("plugins/tcs-plugins/"..plugin.."/main.lua")})
 end

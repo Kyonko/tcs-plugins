@@ -1,3 +1,4 @@
+local name = "CFire"
 tcs.cfire = {}
 tcs.cfire.ui = {}
 
@@ -95,7 +96,7 @@ tcs.cfire.maindlg = tcs.ConfigConstructor("Chainfire Alias Writer", dlg, {SIZE="
 
 function tcs.cfire.close()
 	HideDialog(tcs.cfire.maindlg)
-	ShowDialog(tcs.ui.confdlg)
+	tcs.cli_menu_adjust(name)
 end
 
 function tcs.cfire.ui.closeb:action()
@@ -189,5 +190,5 @@ function tcs.cfire.ui.writeb:action()
 		print("Now bind +cfire"..trigger.." to something and it should work. Made with "..delay.."s delay.")
 	end
 end
-
-tcs.ProvideConfig("CFire", tcs.cfire.maindlg, "Chainfire Alias Writer")
+local cli_cmd = {cmd ="cfire", interp = nil}
+tcs.ProvideConfig(name, tcs.cfire.maindlg, "Chainfire Alias Writer", cli_cmd)

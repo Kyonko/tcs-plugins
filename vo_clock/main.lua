@@ -1,4 +1,5 @@
 --Adds an ingame time readout to you PDA and HUD
+local name = "VO Clock"
 tcs.clock = {}
  
 tcs.clock.color = gkini.ReadString("colors", "chatcolors.activechannel", "28b4f0")
@@ -9,51 +10,43 @@ tcs.clock.HUDformat = gkini.ReadString("tcs", "clock.HUDformat", "!%H:%M")
 tcs.clock.freq = gkini.ReadInt("tcs","clock.pollingfreq", 500)
 tcs.clock.curstate = gkini.ReadInt("tcs", "clock.enabled", 1)
  
-tcs.clock.PDATime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=PDASecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
-tcs.clock.PDAmain = iup.hbox {
-	iup.fill{},tcs.clock.PDATime,iup.fill{}
-}
-tcs.clock.StationTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=StationSecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
-tcs.clock.Stationmain = iup.hbox {
-	iup.fill{},tcs.clock.StationTime,iup.fill{}
-}
-tcs.clock.CapShipTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=CapShipSecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
-tcs.clock.CapShipmain = iup.hbox {
-	iup.fill{},tcs.clock.CapShipTime,iup.fill{}
-}
- 
-tcs.clock.HUDTime = iup.label { title = gkmisc.date(tcs.clock.HUDformat), font = iup.GetNextChild(HUD.selfinfo).font, fgcolor = iup.GetBrother(iup.GetNextChild(HUD.selfinfo)).fgcolor, expand = "HORIZONTAL", alignment = "ACENTER" }
-tcs.clock.HUDmain = iup.vbox {
-	iup.fill { size = 3 },
-	iup.hbox {
-		tcs.clock.HUDTime;
-		alignment = "ACENTER"
-	}
-}
  
 function tcs.clock.UpdateTimes()
-	if(not pcall(function() tcs.clock.HUDTime.title = gkmisc.date(tcs.clock.HUDformat)end)) then tcs.clock.CreateTimeAreas() end
-	tcs.clock.PDATime.title = gkmisc.date(tcs.clock.PDAformat)
+	tcs.clock.HUDTime.title = gkmisc.date(tcs.clock.HUDformat)
+	tcs.clock.PDATime.title = gkmisc.date(tcs.clock.PDAformat) 
 	tcs.clock.StationTime.title = gkmisc.date(tcs.clock.PDAformat)
 	tcs.clock.CapShipTime.title = gkmisc.date(tcs.clock.PDAformat)
 end
-tcs.clock.UpdateTimer = Timer()
  
-function tcs.clock.CreateTimeAreas(first)
-	if tcs.clock.curstate ~= 1 then return end
-	if(not first) then
-		tcs.clock.HUDTime = iup.label { title = gkmisc.date(tcs.clock.HUDformat), font = iup.GetNextChild(HUD.selfinfo).font, fgcolor = iup.GetBrother(iup.GetNextChild(HUD.selfinfo)).fgcolor, expand = "HORIZONTAL", alignment = "ACENTER" }
-			tcs.clock.HUDmain = iup.vbox {
-			iup.fill { size = 3 },
-			iup.hbox {
-			tcs.clock.HUDTime;
-			alignment = "ACENTER"
-			}
+function tcs.clock.CreateTimeAreas(scale)
+	if tcs.clock.UpdateTimer then 
+		tcs.clock.UpdateTimer:Kill()
+		tcs.clock.UpdateTimer = nil 
+	end
+	
+	if not scale then
+		tcs.clock.PDATime = nil
+		tcs.clock.PDAmain = nil
+		tcs.clock.StationTime = nil
+		tcs.clock.Stationmain = nil
+		tcs.clock.CapShipTime = nil
+		tcs.clock.CapShipmain = nil
+
+	
+		tcs.clock.PDATime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=PDASecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
+		tcs.clock.PDAmain = iup.hbox {
+			iup.fill{},tcs.clock.PDATime,iup.fill{}
 		}
-		iup.Append(HUD.selfinfo, tcs.clock.HUDmain)
-		ShowDialog(tcs.clock.HUDmain)
-	else
-		iup.Append(HUD.selfinfo, tcs.clock.HUDmain)
+		tcs.clock.StationTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=StationSecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
+		tcs.clock.Stationmain = iup.hbox {
+			iup.fill{},tcs.clock.StationTime,iup.fill{}
+		}
+		tcs.clock.CapShipTime = iup.label{title=gkmisc.date(tcs.clock.PDAformat), font=CapShipSecondaryInfo.font, fgolor=tabunseltextcolor,alignment="ACENTER"}
+		tcs.clock.CapShipmain = iup.hbox {
+			iup.fill{},tcs.clock.CapShipTime,iup.fill{}
+		}
+		 
+		
 		iup.Append(tcs.GetRelative(StationCurrentLocationInfo, 1), tcs.clock.Stationmain)
 		iup.Append(tcs.GetRelative(PDACurrentLocationInfo, 1), tcs.clock.PDAmain)
 		iup.Append(tcs.GetRelative(CapShipCurrentLocationInfo, 1), tcs.clock.CapShipmain)
@@ -63,25 +56,44 @@ function tcs.clock.CreateTimeAreas(first)
 		iup.Refresh(tcs.GetRelative(StationCurrentLocationInfo, 1))
 		iup.Refresh(tcs.GetRelative(PDACurrentLocationInfo, 1))
 		iup.Refresh(tcs.GetRelative(CapShipCurrentLocationInfo, 1))
-		tcs.clock.HUDmain:show()
 	end
+	
+	tcs.clock.HUDTime = nil
+	tcs.clock.HUDmain = nil
+	
+	tcs.clock.UpdateTimer = Timer()
+	
+	tcs.clock.HUDTime = iup.label { title = gkmisc.date(tcs.clock.HUDformat), font = iup.GetNextChild(HUD.selfinfo).font, fgcolor = iup.GetBrother(iup.GetNextChild(HUD.selfinfo)).fgcolor, expand = "HORIZONTAL", alignment = "ACENTER" }
+	tcs.clock.HUDmain = iup.vbox {
+		iup.fill { size = 3 },
+		iup.hbox {
+			tcs.clock.HUDTime;
+			alignment = "ACENTER"
+		}
+	}
+	iup.Append(HUD.selfinfo, tcs.clock.HUDmain)
+	tcs.clock.HUDmain:show()
 end
  
-function tcs.clock:OnEvent()
-	tcs.clock.CreateTimeAreas(true)
+function tcs.clock:OnEvent(e)
+	if tcs.clock.curstate ~= 1 then return end
+	tcs.clock.CreateTimeAreas(e=="rHUDxscale")
 	tcs.clock.UpdateTimer:SetTimeout(1000 - math.fmod(gkmisc.GetGameTime(), 1000), function ()
-																				if(not pcall(tcs.clock.UpdateTimes)) then tcs.clock.CreateTimeAreas() end
+																				tcs.clock.UpdateTimes()
 																				tcs.clock.UpdateTimer:SetTimeout(tcs.clock.freq)
 																			end)
+	ProcessEvent("TCS_HUD_VOCLOCK_SETUP")
 	UnregisterEvent(self, "SHIP_SPAWNED")
 	UnregisterEvent(self, "SHOW_STATION")
 end
 RegisterEvent(tcs.clock, "SHIP_SPAWNED")
 RegisterEvent(tcs.clock, "SHOW_STATION")
+tcs.RegisterHudScaleEvent(tcs.clock)
  
 if(GetCharacterID()) then
-	tcs.clock:OnEvent()
+	tcs.clock:OnEvent(e)
 end
+	
  
 function tcs.clock.printtime()
 	print("\127" .. tcs.clock.color .. gkmisc.date(tcs.clock.timeformat))
@@ -117,7 +129,7 @@ local closeb = iup.stationbutton{title="OK", action=function()
 										tcs.clock.timeformat = timeform.value
 										tcs.clock.HUDformat = hudform.value
 										tcs.clock.freq = tonumber(freq.value)
-										ShowDialog(tcs.ui.confdlg, iup.CENTER, iup.CENTER)
+										tcs.cli_menu_adjust(name)
 									end}
 local cancelb = iup.stationbutton{title="Cancel", action=function()
 										HideDialog(tcs.clock.maindlg)
@@ -125,7 +137,7 @@ local cancelb = iup.stationbutton{title="Cancel", action=function()
 										timeform.value = tcs.clock.timeformat
 										hudform.value = tcs.clock.HUDformat
 										freq.value = tcs.clock.freq
-										ShowDialog(tcs.ui.confdlg, iup.CENTER, iup.CENTER)
+										tcs.cli_menu_adjust(name)
 									end}
 									
 local function OpenHelp()
@@ -205,4 +217,5 @@ function tcs.clock.state(_, v)
 	return
 end
 --Make the configuration menu available to TCS
-tcs.ProvideConfig("VO Clock", tcs.clock.maindlg, "Adds a clock to your HUD and PDA.",tcs.clock.state)
+local cli_cmd = {cmd = "voclock", interp = nil}
+tcs.ProvideConfig(name, tcs.clock.maindlg, "Adds a clock to your HUD and PDA.",cli_cmd,tcs.clock.state)

@@ -3,7 +3,7 @@
 
 tcs.alm = {}
 tcs.alm.cache = {}
-
+local plug_name = "AlertMachine"
 local function init()
 	tcs.alm.state = gkini.ReadInt("tcs", "alm.state", 1)
 	tcs.alm.usefactioncolors = gkini.ReadInt("tcs", "alm.usefactioncolors", 1)
@@ -435,12 +435,12 @@ local closeb = iup.stationbutton{title="OK", action=function()
 											gkini.WriteInt("tcs", "alm.usehpcolors", tcs.ToggleStateToInt(usehpcolors.value))
 											gkini.WriteInt("tcs", "alm.usedistcolors", tcs.ToggleStateToInt(usedistcolors.value))
 											init()
-											ShowDialog(tcs.ui.confdlg)
+											tcs.cli_menu_adjust(plug_name)
 										end}
 local cancelb = iup.stationbutton{title="Cancel", action=function()
 											HideDialog(tcs.alm.confdlg)
 											tcs.alm.confdlg:init()
-											ShowDialog(tcs.ui.confdlg)
+											tcs.cli_menu_adjust(plug_name)
 										end}
 										
 local helpclose = iup.hbox{iup.stationbutton{title="Help", hotkey=iup.K_h, action=function() OpenHelp() end}, iup.fill{}, closeb, cancelb}
@@ -479,7 +479,9 @@ local mainv = {
 }										
 
 tcs.alm.confdlg = tcs.ConfigConstructor("AlertMachine Config", mainv, {defaultesc = cancelb})
-tcs.ProvideConfig("AlertMachine", tcs.alm.confdlg, "Sends text alerts regarding other players in sector.", function(_,v) 
+
+local cli_cmd = {cmd ="alertmachine", interp = nil}
+tcs.ProvideConfig(plug_name, tcs.alm.confdlg, "Sends text alerts regarding other players in sector.", cli_cmd, function(_,v) 
 																				if v == 1 then
 																					tcs.alm.state = 1
 																					gkini.WriteInt("tcs", "alm.state", 1)
