@@ -47,6 +47,7 @@ mf.GetFriendlyStatus_OLD = GetFriendlyStatus
 local tSaS = tcs.StringAtStart
 function mf.GetFriendlyStatus(charid)
 	local name = string.lower(GetPlayerName(charid))
+	local NPC = tSaS(name, "*")
 	local guild_tag = string.lower(GetGuildTag(charid))
 	if((FS["FlagHostile"] == true) and mf.LastAggro[charid]) then
 		if(mf.LastAggro[charid]["lasthit"] > (os.time() - mf.LastAggro.timeout)) then 
@@ -67,15 +68,28 @@ function mf.GetFriendlyStatus(charid)
 		return 3
 	elseif(FS["Buddy"] and tcs.IsBuddy(charid)) then
 		return 3
-	elseif(FS["NPC"] and tSaS(name, "*")) then
-		if(FS["StatG"] and (tSaS(name, "*statio") or tSaS(name, "*marsha"))) then return 0 end
-		if(FS["SF"] and (tSaS(name, "*stri") or tSaS(name, "*aerna se"))) then return 0 end
-		if(FS["Conq"] and (tSaS(name, "*CONQU")) then
-			--Do some extra logic to check keys here
-			return 0
-		end
-		return 3
+
+		--IMPLEMENT HIVE LOGIC, YO
+	--elseif(NPC and HIVE_CHECK()) then 
+	--	return (FS["Hive"] and 3) or 0
+
+	elseif(NPC and (FS["StatG"] ~= -1) and tSaS(name, "*statio") or tSaS(name, "*marsha")) then 
+		return (FS["StatG"] and 3) or 0 
+	elseif(NPC and (FS["SF"] ~= -1) and tSaS(name, "*stri") or tSaS(name, "*aerna se")) then 
+		return (FS["SF"] and 3) or 0 
+
+	--Check if player chose to force Conquerable assets here to red or green
+	elseif(NPC and (FS["Conq"] ~= -1) and tSaS(name, "*conqu") and FS["Conq_like_npc"]) then 
+		return (FS["Conq"] and 3) or 0 
+
+	--Okay, must be something else if we haven't caught it yet
+	elseif(NPC and (FS["norm"] ~= 1)) 
+		return (FS["norm"] and 3) or 0
 	else
+		if(NPC and tSaS(name, "*conqu")) then
+			--Check key for conquerable station friendly status here
+			--return CONQ_FRIENDLY_STATUS
+		end
 		if(mf.factions[GetPlayerFaction(charid)]) then
 			return 3
 		end
