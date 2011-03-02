@@ -87,7 +87,7 @@ end
 local psuccess, perr = pcall(load_libs)
 
 if (not psuccess) or FAILED then 
-	console_print("\127ffffff------------\n\127ff2020WARNING\127ffffff: TCS has \12740ccffNOT\127ffffff loaded correctly.\n\tIf you didn't cause this on purpose, post the following message to the TCS thread in Community Projects or contact 'Kavec' on irc.slashnet.org:#scuba. If you did, gofix it yourself you butt :|")
+	console_print("\127ffffff------------\n\127ff2020WARNING\127ffffff: TCS has \12740ccffNOT\127ffffff loaded correctly.\n\tIf you didn't cause this on purpose, post the following message to the TCS thread in Community Projects or contact 'Kavec' on irc.slashnet.org:#scuba. If you did, go fix it yourself you butt :|")
 	printtable(lib_err)
 	if perr and type(perr) ~= "function" then console_print(perr) end
 	console_print("------------")

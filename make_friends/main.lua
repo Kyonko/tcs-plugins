@@ -15,7 +15,7 @@ tcs.require("make_friends_ui")
 
 -- This file contains everything specific to MakeFriends, that isn't very useful in any other situation
 --Table init
-mf.FS = { Guild = false, Group = false, NPC = false, Buddy = false,  StatG = false, SF = false, igEnemy = false, igFriend = false, igEnemyGuild = false, igFriendGuild = false, FlagHostile = false, ConsiderStanding = false}
+mf.FS = { Guild = false, Group = false, Buddy = false,  Hive = 1, StatG = 1, SF = 1, Conq = 1, norm = 1, igEnemy = false, igFriend = false, igEnemyGuild = false, igFriendGuild = false, FlagHostile = false, ConsiderStanding = false}
 local FS = mf.FS
 
 mf.factions = {}
@@ -45,10 +45,43 @@ mf.LastAggro.timeout = 300
 --Functional functions
 mf.GetFriendlyStatus_OLD = GetFriendlyStatus
 local tSaS = tcs.StringAtStart
+
+local oldsectorid, old_keyid, oldsector_conq_friendly_status, conq_status_invalid = nil, nil, false, true
+
+function mf.invalidate_conq_status(e,arg) 
+	--fuck it, we're not shifting keys to preserve the cache. It only takes one hit to redo it anyway
+	if(e == "KEYADDED") then conq_status_invalid = true return end
+	if(arg == nil or arg == old_keyid) then conq_status_invalid = true return end
+end
+
+RegisterEvent(mf.invalidate_conq_status, "KEYADDED")
+RegisterEvent(mf.invalidate_conq_status, "KEYREMOVED")
+RegisterEvent(mf.invalidate_conq_status, "PLAYER_LOGGED_OUT")
+RegisterEvent(mf.invalidate_conq_status, "PLAYER_ENTERED_GAME")
+
+function mf.conq_sector_friendly_status()
+	local sectorid = GetCurrentSectorid()
+	--Do a bit of caching to reduce overhead
+	if((not conq_status_invalid) and sectorid == oldsectorid) then
+		return (oldsector_conq_friendly_status and 3) or 0
+	end
+	for i=1, GetNumKeysInKeychain() do
+		local key, sector, res = {GetKeyInfo(i)}, ShortLocationStr(sectorid), false
+		if(key[2]:find(sector, 15, "plain")) then
+			res = ((not key[3]) and true) or key[7]
+			oldsectorid, old_keyid, oldsector_conq_friendly_status, conq_status_invalid = sectorid, i, res, false
+			return (res and 3) or 0
+		end
+	end
+	oldsectorid, oldsector_conq_friendly_status, conq_status_invalid = sectorid, false, false
+	return 0
+end
+
 function mf.GetFriendlyStatus(charid)
 	local name = string.lower(GetPlayerName(charid))
 	local NPC = tSaS(name, "*")
 	local guild_tag = string.lower(GetGuildTag(charid))
+	local faction = GetPlayerFaction(charid) or 0
 	if((FS["FlagHostile"] == true) and mf.LastAggro[charid]) then
 		if(mf.LastAggro[charid]["lasthit"] > (os.time() - mf.LastAggro.timeout)) then 
 			return 0 
@@ -68,39 +101,32 @@ function mf.GetFriendlyStatus(charid)
 		return 3
 	elseif(FS["Buddy"] and tcs.IsBuddy(charid)) then
 		return 3
-
-		--IMPLEMENT HIVE LOGIC, YO
-	--elseif(NPC and HIVE_CHECK()) then 
-	--	return (FS["Hive"] and 3) or 0
-
-	elseif(NPC and (FS["StatG"] ~= -1) and tSaS(name, "*statio") or tSaS(name, "*marsha")) then 
-		return (FS["StatG"] and 3) or 0 
-	elseif(NPC and (FS["SF"] ~= -1) and tSaS(name, "*stri") or tSaS(name, "*aerna se")) then 
-		return (FS["SF"] and 3) or 0 
-
 	--Check if player chose to force Conquerable assets here to red or green
-	elseif(NPC and (FS["Conq"] ~= -1) and tSaS(name, "*conqu") and FS["Conq_like_npc"]) then 
-		return (FS["Conq"] and 3) or 0 
-
-	--Okay, must be something else if we haven't caught it yet
-	elseif(NPC and (FS["norm"] ~= 1)) 
-		return (FS["norm"] and 3) or 0
-	else
-		if(NPC and tSaS(name, "*conqu")) then
-			--Check key for conquerable station friendly status here
-			--return CONQ_FRIENDLY_STATUS
+	elseif(NPC and tSaS(name, "*conqu")) then 
+		if(FS["Conq"] == 1) then
+			return mf.conq_sector_friendly_status()
 		end
-		if(mf.factions[GetPlayerFaction(charid)]) then
+		return (FS["Conq"]==3 and 3) or 0 
+	elseif(NPC and (FS["Hive"]~= 1) and faction==0) then 
+		return (FS["Hive"]==3 and 3) or 0
+
+	elseif(NPC and (FS["StatG"] ~= 1) and tSaS(name, "*statio") or tSaS(name, "*marsha")) then 
+		return (FS["StatG"]==3 and 3) or 0 
+	elseif(NPC and (FS["SF"] ~= 1) and tSaS(name, "*stri") or tSaS(name, "*aerna Se")) then 
+		return (FS["SF"]==3 and 3) or 0 
+	elseif(NPC and (FS["norm"] ~= 1)) then
+		return (FS["norm"]==3 and 3) or 0
+	else
+		if(mf.factions[faction]) then
 			return 3
 		end
 		if(FS["ConsiderStanding"]) then
-			local theirfaction = GetPlayerFaction(charid) or 0
   			local myfaction = GetPlayerFaction() or 0
-  			if (theirfaction == 0) or (myfaction == 0) then return 0 end
+  			if (faction == 0) or (myfaction == 0) then return 0 end
 
   			local val = 0
   			if (GetPlayerFactionStanding(myfaction, charid) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
-  			if (GetPlayerFactionStanding(theirfaction) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
+  			if (GetPlayerFactionStanding(faction) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
   			if (GetPlayerFactionStanding("sector", charid) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
   			return val
 		end
@@ -132,9 +158,12 @@ function mf.LoadSettings(preset)
 	FS["Group"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "Group", "ON"))
 	FS["Guild"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "Guild", "ON"))
 	FS["Buddy"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "Buddies", "ON"))
-	FS["NPC"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "NPCs", "ON"))
-	FS["StatG"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "StatG", "OFF"))
-	FS["SF"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "SF", "OFF"))
+	--FS["NPC"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "NPCs", "ON"))
+	FS["Hive"] = gkini.ReadInt("MakeFriends_"..preset, "Hive", 1)
+	FS["StatG"] = gkini.ReadInt("MakeFriends_"..preset, "StatG", 1)
+	FS["SF"] = gkini.ReadInt("MakeFriends_"..preset, "SF", 1)
+	FS["Conq"] = gkini.ReadInt("MakeFriends_"..preset, "Conq", 1)
+	FS["norm"] = gkini.ReadInt("MakeFriends_"..preset, "norm", 1)
 	FS["igEnemy"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "igEnemy", "OFF"))
 	FS["igFriend"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "igFriend", "OFF"))
 	FS["igEnemyGuild"] = tcs.ToggleStateToBool(gkini.ReadString("MakeFriends_"..preset, "igEnemyGuild", "OFF"))
@@ -167,9 +196,12 @@ function mf.SaveSettings(preset)
 	gkini.WriteString("MakeFriends_"..preset, "Group", iup.GetAttribute(mf.ui.group, "VALUE"))
 	gkini.WriteString("MakeFriends_"..preset, "Guild", iup.GetAttribute(mf.ui.guild, "VALUE"))
 	gkini.WriteString("MakeFriends_"..preset, "Buddies", iup.GetAttribute(mf.ui.buddies, "VALUE"))
-	gkini.WriteString("MakeFriends_"..preset, "NPCs", iup.GetAttribute(mf.ui.NPC, "VALUE"))
-	gkini.WriteString("MakeFriends_"..preset, "StatG", iup.GetAttribute(mf.ui.statg, "VALUE"))
-	gkini.WriteString("MakeFriends_"..preset, "SF", iup.GetAttribute(mf.ui.sf, "VALUE"))
+	--gkini.WriteString("MakeFriends_"..preset, "NPCs", iup.GetAttribute(mf.ui.NPC, "VALUE"))
+	gkini.WriteInt("MakeFriends_"..preset, "Hive", iup.GetAttribute(mf.ui.hive, "VALUE"))
+	gkini.WriteInt("MakeFriends_"..preset, "StatG", iup.GetAttribute(mf.ui.statg, "VALUE"))
+	gkini.WriteInt("MakeFriends_"..preset, "SF", iup.GetAttribute(mf.ui.sf, "VALUE"))
+	gkini.WriteInt("MakeFriends_"..preset, "Conq", iup.GetAttribute(mf.ui.conq, "VALUE"))
+	gkini.WriteInt("MakeFriends_"..preset, "norm", iup.GetAttribute(mf.ui.norm, "VALUE"))
 	gkini.WriteString("MakeFriends_"..preset, "igEnemy", iup.GetAttribute(mf.ui.igenemy, "VALUE"))
 	gkini.WriteString("MakeFriends_"..preset, "igFriend", iup.GetAttribute(mf.ui.igfriend, "VALUE"))
 	gkini.WriteString("MakeFriends_"..preset, "igEnemyGuild", iup.GetAttribute(mf.ui.igenemyguild, "VALUE"))
@@ -177,6 +209,7 @@ function mf.SaveSettings(preset)
 	gkini.WriteString("MakeFriends_"..preset, "FlagHostiles", iup.GetAttribute(mf.ui.flaghostile, "VALUE"))
 	gkini.WriteInt("MakeFriends_"..preset, "HostileTimeout", iup.GetAttribute(mf.ui.flaghostiletext, "VALUE") * 60)
 	gkini.WriteString("MakeFriends_"..preset, "ConsiderStanding", iup.GetAttribute(mf.ui.considerstanding, "VALUE"))
+	mf.invalidate_conq_status(nil, nil)
 end
 
 function mf.LoadLists()
@@ -245,6 +278,12 @@ local function fac_defs(fs_def, ui_elm)
 	end
 end
 
+local function npc_defs(fs_def, ui_elm, stat_elm)
+	local color = (fs_def==1 and "255 204 241") or (fs_def==2 and "255 0 0") or "0 255 0"
+	if(stat_elm) then stat_elm.fgcolor = color end
+	if(ui_elm) then ui_elm.value = fs_def end
+end
+
 function mf.GetFriends()
 	npc_defs(FS["StatG"], mf.ui.statg)
 	npc_defs(FS["SF"], mf.ui.sf)
@@ -276,7 +315,15 @@ function mf.GetFriends()
 	fac_defs(FS["Guild"], mf.ui.guild)
 	fac_defs(FS["Group"], mf.ui.group)
 	fac_defs(FS["Buddy"], mf.ui.buddies)
-	fac_defs(FS["NPC"], mf.ui.NPC)
+	--fac_defs(FS["NPC"], mf.ui.NPC)
+	
+	npc_defs(FS["Hive"], mf.ui.hive, mf.ui.hivestat)
+	npc_defs(FS["StatG"], mf.ui.statg, mf.ui.statgstat)
+	npc_defs(FS["SF"], mf.ui.sf, mf.ui.sfstat)
+	npc_defs(FS["Conq"], mf.ui.conq, mf.ui.conqstat)
+	npc_defs(FS["norm"], mf.ui.norm, mf.ui.normstat)
+	mf.invalidate_conq_status(nil, nil)
+	
 end
 
 function mf.LastAggro:OnEvent(event, victim, aggressor)

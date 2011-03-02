@@ -2,22 +2,14 @@
 tcs.VERSION = "1.4SUB2"
 
 --If you don't know the terrible secret of TCS, then this variable will do nothing for you.
-tcs.noSHA1 = false
+tcs.noSHA1 = true
 
 --Declares and adds a whole bunch of controls to a host table for use by iup
 --Table entries should look like so:
---While not generic enough, it does work on anything that has 'title' as a main attribute. Hence titled.
--- "name" = {kind = "<iup control>", title = "This thingy"[,args={iup_arg = "arg", ...}]
-function tcs.BatchAddTitledControls(batch_struct, host_table) 
+-- "name" = {kind = "<iup control>", <title = "This thingy"|value = "whatever"|(nothing)>[,args={iup_arg = "arg", ...}]
+function tcs.BatchAddControls(batch_struct, host_table) 
 	for name, attrib in pairs(batch_struct) do
-		local elem = iup[attrib.kind]{title=attrib.title}
-		local args = {}
-		if(attrib.args) then
-			for arg, val in pairs(attrib.args) do
-				table.insert(args, arg.."="..val)
-			end
-			iup.SetAttributes(elem, table.concat(args, ","))
-		end
+		local elem = iup[attrib[1]](attrib[2])
 		host_table[name] = elem
 	end
 end

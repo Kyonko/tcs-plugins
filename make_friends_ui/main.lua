@@ -1,53 +1,65 @@
 tcs.mf.ui = {} --The help dialog
 local mui = tcs.mf.ui --Binding for main UI
-mui.halpmsg = "Welcome to Make Friends, the radar customization applet!\n\n\tThe main window lets you select what overall groups/factions appear red or green on your radar. If the toggle is colored red, it will appear red on your radar. Likewise if the toggle is colored green. \"Groups\" toggles take precedence over \"Factions\" toggles- namely, if you have NPC's set as friendly/green, then you can't turn any NPC's red no matter what factions you select below. However, there are toggles to force certain NPC's to be always hostile(strikeforces and station guards). \n\n\tThe Friends and Enemies lists windows allows you to specify people or guilds who are always green or always red on radar, respectively. The enemies list takes precedence over the friends list, so any person or guild on the enemies list is always red even if you have them put down in the friends list eighty times. To ignore your friends and enemies lists, for Nation War or some other team event, check the relevant toggles in the main window. Click on the \"Edit Lists\" button to access the edits for manual editing of these lists. Use the \"Edit People Lists\" button to manage individual players, and the \"Edit Guild Lists\" to manage guilds. Do not use quotes when entering players who have more than one word in their name, and on the guilds list, only use the acronym of a guild when adding entries.\n\n\tThe toggles on the bottom-left of the main window are used, respectively, to:\n\t\t- Set all station guards as hostile\n\t\t- Set all strike forces as hostile\n\t\t- Pretend your enemy players list is empty\n\t\t- Pretend your enemy guilds list is empty\n\t\t- Pretend your friendly players list is empty\n\t\t- Pretend your friendly guilds list is empty\n\t\t- Take a player\'s faction standing into account when showing them on the radar\n\t\t- If you are hit by another player they will be red for the amount of time displayed\n\t\tin the box, and if you hit another player, your CURRENT TARGET will be red for\n\t\thowever many minutes are displayed in the box\n\n\tThe Save Presets button will prompt you for a name to save your current toggle settings as. WARNING: Save Presets button will overwrite presets without warning. \n\n\tEdit Presets allows you to load or delete presets, or load the \'current\' defaults. If you have no presets or have just loaded the default presets, any changes you make to the toggles in the main window will be reflected in the default preset once you hit \"OK\". It is suggested that you make the defaults a setting you usually fly around as, and use presets for special circumstances(such as events).\n\n\tLastly, hit \"OK\" to save everything and all that good stuff.\n\n\tFor more advanced users, you can also use the following commands to reset lists of people who have hit you and are thusly marked red.\n\t\t- /tcs makefriends reset player\n\t\t- /tcs makefriends reset npc\n\t\t- /tcs makefriends reset all\n\n\tThe commands are a bit slipshod, but do as they say on the tin. Good luck!\n\n\n\nCredits:\nWritten by Scuba Steve 9.0.\nVersion 1.3.1 modified by raybondo.\nAlertMachine interface created from modified whois code written by Eonis Jannar.\nHelpfile for original MF v1.5.0 updated by Miharu."
+mui.halpmsg = "Welcome to Make Friends, the radar customization applet!\n\n\tThe main window lets you select what overall groups/factions appear red or green on your radar. If the toggle is colored red, it will appear red on your radar. Likewise if the toggle is colored green. \"Categories\" toggles and \"NPCs\" controls take precedence over \"Factions\" toggles- namely, if you have certain NPC's or your guildmates set as friendly/green, then you can't turn those NPCs or your guildmates red no matter what factions you configure to be hostile. \n\n\tA note about the \"Conquerable Assets\": MakeFriends doesn't yet have full support to figure out who has the right IFF settings in a conquerable sector, but it can figure out if the turrets hate you or not. Having MakeFriends treat the turrets \"As Player\" enables this logic.\n\n\tThe Friends and Enemies lists windows allows you to specify people or guilds who are always green or always red on radar, respectively. The enemies list takes precedence over the friends list, so any person or guild on the enemies list is always red even if you have them put down in the friends list eighty times. To ignore your friends and enemies lists, for Nation War or some other team event, check the relevant toggles in the main window. Click on the \"Edit Lists\" button to access the edits for manual editing of these lists. Use the \"Edit People Lists\" button to manage individual players, and the \"Edit Guild Lists\" to manage guilds. Do not use quotes when entering players who have more than one word in their name, and on the guilds list, only use the acronym of a guild when adding entries.\n\n\tThe toggles on the bottom-left of the main window are used, respectively, to:\n\t\t- Pretend your enemy players list is empty\n\t\t- Pretend your enemy guilds list is empty\n\t\t- Pretend your friendly players list is empty\n\t\t- Pretend your friendly guilds list is empty\n\t\t- Take a player\'s faction standing into account when showing them on the radar\n\t\t- If you are hit by another player they will be red for the amount of time displayed\n\t\tin the box, and if you hit another player, your CURRENT TARGET will be red for\n\t\thowever many minutes are displayed in the box\n\n\tThe Save Presets button will prompt you for a name to save your current toggle settings as. WARNING: Save Presets button will overwrite presets without warning. \n\n\tEdit Presets allows you to load or delete presets, or load the \'current\' defaults. If you have no presets or have just loaded the default presets, any changes you make to the toggles in the main window will be reflected in the default preset once you hit \"OK\". It is suggested that you make the defaults a setting you usually fly around as, and use presets for special circumstances(such as events).\n\n\tLastly, hit \"OK\" to save everything and all that good stuff.\n\n\tFor more advanced users, you can also use the following commands to reset lists of people who have hit you and are thusly marked red.\n\t\t- /tcs makefriends reset player\n\t\t- /tcs makefriends reset npc\n\t\t- /tcs makefriends reset all\n\n\tThe commands are a bit slipshod, but do as they say on the tin. Good luck!\n\n\n\nCredits:\nWritten by Scuba Steve 9.0.\nPre-TCS version 1.3.1 modified by raybondo.\nAlertMachine interface created from modified whois code written by Eonis Jannar.\nHelpfile for Pre-TCS MF v1.5.0 updated by Miharu."
 
-mui.mtitles = {
+mui.mcontrols = {
 	--Only place elements with 'title' as a basic element in this group. Too lazy to actually add in the edge cases. Oh well.
-	NPC = 		{kind = "stationtoggle", title = "NPC\s", args = {fgcolor="255 0 0"}},
-	guild = 	{kind = "stationtoggle", title = "Guild Members", args = {fgcolor = "255 0 0"}},
-	group = 	{kind = "stationtoggle", title = "Group Members", args = {fgcolor="255 0 0"}},
-	buddies = 	{kind = "stationtoggle", title = "Buddies", args = {fgcolor="255 0 0"}},
-	serco = 	{kind = "stationtoggle", title = "Serco Dominion", args = {fgcolor="255 0 0" }},
-	itani = 	{kind = "stationtoggle", title = "Itani Nation", args = {fgcolor="255 0 0" }},
-	uit = 		{kind = "stationtoggle", title = "Union of Independent Territories", args = {fgcolor="255 0 0" }},
-	aeolus = 	{kind = "stationtoggle", title = "Aeolus Trading Prefectorate", args = {fgcolor="255 0 0" }},
-	xangxi = 	{kind = "stationtoggle", title = "Xang Xi Automated Systems", args = {fgcolor="255 0 0" }},
-	biocom = 	{kind = "stationtoggle", title = "Biocom Industries", args = {fgcolor="255 0 0" }},
-	ineubis = 	{kind = "stationtoggle", title = "Ineubis Defense Research", args = {fgcolor="255 0 0" }},
-	valent = 	{kind = "stationtoggle", title = "Valent Robotics", args = {fgcolor="255 0 0" }},
-	axia = 		{kind = "stationtoggle", title = "Axia Technology Corp", args = {fgcolor="255 0 0" }},
-	corvus = 	{kind = "stationtoggle", title = "Corvus Prime", args = {fgcolor="255 0 0" }},
-	tunguska =	{kind = "stationtoggle", title = "Tunguska Heavy Mining Concern", args = {fgcolor="255 0 0" }},
-	orion = 	{kind = "stationtoggle", title = "Orion Heavy Manufacturing", args = {fgcolor="255 0 0" }},
-	unaligned=	{kind = "stationtoggle", title = "Unaligned", args = {fgcolor="255 0 0" }},
-	tpg = 		{kind = "stationtoggle", title = "TPG Corporation", args = {fgcolor="255 0 0" }},
-	statg = 	{kind = "stationtoggle", title = "Set Station Guards Hostile", args = {fgcolor="255 255 255" }},
-	sf = 		{kind = "stationtoggle", title = "Set Strike Forces Hostile", args = {fgcolor="255 255 255" }},
-	igfriend =	{kind = "stationtoggle", title = "Ignore Friend Players List", args = {fgcolor="255 255 255" }},
-	igenemy = 	{kind = "stationtoggle", title = "Ignore Enemy Players List", args = {fgcolor="255 255 255" }},
-	igfriendguild = 	{kind = "stationtoggle", title = "Ignore Friend Guilds List", args = {fgcolor="255 255 255" }},
-	igenemyguild = 		{kind = "stationtoggle", title = "Ignore Enemy Guilds List", args = {fgcolor="255 255 255" }},
-	flaghostile = 		{kind = "stationtoggle", title = "Set hostiles red for ", args = {fgcolor="255 255 255" }},
-	considerstanding =	{kind = "stationtoggle", title = "Consider Faction Standings.", args={fgcolor = "255 255 255" }},
-	groupstitle = 		{kind = "label", title = "Groups" },
-	factionstitle = 	{kind = "label", title = "Factions" },
-	halpb = 			{kind = "stationbutton", title = "Help"},
-	makefriendsb = 		{kind = "stationbutton", title = "OK" },
-	closeb = 			{kind = "stationbutton", title = "Close"},
-	listsopenb = 		{kind = "stationbutton", title = "Edit Lists",  args = {expand = "HORIZONTAL" }},
-	savepresetb = 		{kind = "stationbutton", title = "Save as Preset"},
-	presetsb = 			{kind = "stationbutton", title = "Edit Presets"},
-	fandeopenb = 		{kind = "stationbutton", title = "Edit People Lists",  args = {expand = "HORIZONTAL" }},
-	guildopenb = 		{kind = "stationbutton", title = "Edit Guild Lists",  args = {expand = "HORIZONTAL" }}
+	--NPC = 		{"stationtoggle", title = "NPC\s", args = {fgcolor="255 0 0"}},
+	guild = 	{"stationtoggle",{title = "Guild Members",fgcolor = "255 0 0"}},
+	group = 	{"stationtoggle",{title = "Group Members",fgcolor="255 0 0"}},
+	buddies = 	{"stationtoggle",{title = "Buddies",fgcolor="255 0 0"}},
+	serco = 	{"stationtoggle", {title = "Serco Dominion",fgcolor="255 0 0" }},
+	itani = 	{"stationtoggle", {title = "Itani Nation",fgcolor="255 0 0" }},
+	uit = 		{"stationtoggle", {title = "Union of Independent Territories",fgcolor="255 0 0" }},
+	aeolus = 	{"stationtoggle", {title = "Aeolus Trading Prefectorate",fgcolor="255 0 0" }},
+	xangxi = 	{"stationtoggle", {title = "Xang Xi Automated Systems",fgcolor="255 0 0" }},
+	biocom = 	{"stationtoggle", {title = "Biocom Industries",fgcolor="255 0 0" }},
+	ineubis = 	{"stationtoggle", {title = "Ineubis Defense Research",fgcolor="255 0 0" }},
+	valent = 	{"stationtoggle", {title = "Valent Robotics",fgcolor="255 0 0" }},
+	axia = 		{"stationtoggle", {title = "Axia Technology Corp",fgcolor="255 0 0" }},
+	corvus = 	{"stationtoggle", {title = "Corvus Prime",fgcolor="255 0 0" }},
+	tunguska =	{"stationtoggle", {title = "Tunguska Heavy Mining Concern",fgcolor="255 0 0" }},
+	orion = 	{"stationtoggle",{title = "Orion Heavy Manufacturing", fgcolor="255 0 0" }},
+	unaligned=	{"stationtoggle", {title = "Unaligned", fgcolor="255 0 0" }},
+	tpg = 		{"stationtoggle",{title = "TPG Corporation", fgcolor="255 0 0" }},
+	
+	hivestat = 	{"label", {title = "Hivebots", fgcolor="255 204 241"}},
+	statgstat = {"label", {title = "Station Guards",fgcolor="255 204 241"}},
+	sfstat = 	{"label", {title = "Strike Force", fgcolor="255 204 241"}},
+	conqstat = 	{"label", {title = "Conquerable Assets", fgcolor="255 204 241"}},
+	normstat = 	{"label", {title = "Other NPCs", fgcolor="255 204 241"}},
+	hive = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly"}},
+	statg = 	{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly"}},
+	sf = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly"}},
+	conq = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly"}},
+	norm = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly"}},
+	
+	igfriend =	{"stationtoggle",{ title = "Ignore Friend Players List",fgcolor="255 255 255" }},
+	igenemy = 	{"stationtoggle", {title = "Ignore Enemy Players List",fgcolor="255 255 255" }},
+	igfriendguild = 	{"stationtoggle", {title = "Ignore Friend Guilds List",fgcolor="255 255 255" }},
+	igenemyguild = 		{"stationtoggle", {title = "Ignore Enemy Guilds List",fgcolor="255 255 255" }},
+	flaghostile = 		{"stationtoggle", {title = "Set hostiles red for ",fgcolor="255 255 255" }},
+	considerstanding =	{"stationtoggle", {title = "Consider Faction Standings.", fgcolor = "255 255 255" }},
+	groupstitle = 		{"label", {title="Categories"}},
+	factionstitle = 	{"label", {title = "Factions"} },
+	npcstitle =			{"label", {title = "NPCs"} },
+	halpb = 			{"stationbutton", {title = "Help"}},
+	makefriendsb = 		{"stationbutton", {title = "OK"} },
+	closeb = 			{"stationbutton", {title = "Close"}},
+	listsopenb = 		{"stationbutton", {title = "Edit Lists", expand = "HORIZONTAL" }},
+	savepresetb = 		{"stationbutton", {title = "Save as Preset"}},
+	presetsb = 			{"stationbutton", {title = "Edit Presets"}},
+	fandeopenb = 		{"stationbutton", {title = "Edit People Lists", expand = "HORIZONTAL" }},
+	guildopenb = 		{"stationbutton", {title = "Edit Guild Lists", expand = "HORIZONTAL" }}
 }
 
-tcs.BatchAddTitledControls(mui.mtitles, mui)
+tcs.BatchAddControls(mui.mcontrols, mui)
 
---Stuff that doesn't work above
+--TODO: Move this into batch table above and convert values not in batch tables below to batch tables
 mui.flaghostiletext = iup.text { value = "", size = "50x" }
 mui.titlepadding = iup.fill {}
 mui.groupsspacer = iup.fill {}
+mui.npcsspacer = iup.fill {}
 mui.factionsspacer = iup.fill { size = "20"}
 
 local elems = {
@@ -60,9 +72,29 @@ local elems = {
 		mui.groupsspacer,
 		iup.vbox{
 			mui.group,
-			mui.NPC
+			--mui.NPC
 		},
 		iup.fill{},
+	},
+	mui.npcstitle,
+	iup.hbox {
+		iup.fill{size="17"},
+		iup.vbox{
+			mui.hivestat,
+			mui.statgstat,
+			mui.sfstat,
+			mui.conqstat,
+			mui.normstat
+		},
+		mui.npcsspacer,
+		iup.vbox{
+			mui.hive,
+			mui.statg,
+			mui.sf,
+			mui.conq,
+			mui.norm
+		},
+		iup.fill{}
 	},
 	mui.factionstitle,
 	iup.hbox {
@@ -85,6 +117,7 @@ local elems = {
 			mui.ineubis,
 			mui.unaligned,
 		},
+		iup.fill{}
 	},
 	iup.fill { size = "40" },
 	iup.hbox{
@@ -179,9 +212,12 @@ function mui.makefriendsb:action()
 	tcs.mf.FS["Group"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.group, "VALUE"))
 	tcs.mf.FS["Guild"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.guild, "VALUE"))
 	tcs.mf.FS["Buddy"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.buddies, "VALUE"))
-	tcs.mf.FS["NPC"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.NPC, "VALUE"))
-	tcs.mf.FS["StatG"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.statg, "VALUE"))
-	tcs.mf.FS["SF"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.sf, "VALUE"))
+	--tcs.mf.FS["NPC"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.NPC, "VALUE"))
+	tcs.mf.FS["Hive"] = tonumber(iup.GetAttribute(mui.hive, "VALUE"))
+	tcs.mf.FS["StatG"] = tonumber(iup.GetAttribute(mui.statg, "VALUE"))
+	tcs.mf.FS["SF"] = tonumber(iup.GetAttribute(mui.sf, "VALUE")) 
+	tcs.mf.FS["Conq"] = tonumber(iup.GetAttribute(mui.conq, "VALUE")) 
+	tcs.mf.FS["norm"] = tonumber(iup.GetAttribute(mui.norm, "VALUE"))
 	tcs.mf.FS["igEnemy"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.igenemy, "VALUE"))
 	tcs.mf.FS["igFriend"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.igfriend, "VALUE"))
 	tcs.mf.FS["igEnemyGuild"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.igenemyguild, "VALUE"))
@@ -189,23 +225,24 @@ function mui.makefriendsb:action()
 	tcs.mf.FS["FlagHostile"] = tcs.ToggleStateToBool(mui.flaghostile.value)
 	tcs.mf.LastAggro.timeout = mui.flaghostiletext.value * 60
 	tcs.mf.FS["ConsiderStanding"] = tcs.ToggleStateToBool(mui.considerstanding.value)
+	tcs.mf.invalidate_conq_status(nil, nil)
 	tcs.mf.close()
 	tcs.mf.SaveSettings(tcs.mf.curpreset)
 end
 
 --Guild lists dialog, go~!
-mui.gtitles = {
-	guildlistscloseb =	{kind = "stationbutton", title = "Close & Save", args = {expand = "HORIZONTAL" }},
-	whitetoblackb = 	{kind = "stationbutton", title = ">" },
-	blacktowhiteb = 	{kind = "stationbutton", title = "<" },
-	addwhite = 			{kind = "stationbutton", title = "Add as Friendly Guild", args = {expand = "HORIZONTAL" }},
-	addblack = 			{kind = "stationbutton", title = "Add as Enemy Guild", args = {expand = "HORIZONTAL" }},
+mui.gcontrols = {
+	guildlistscloseb =	{"stationbutton", {title =  "Close & Save",expand = "HORIZONTAL" }},
+	whitetoblackb = 	{"stationbutton", {title =  ">" }},
+	blacktowhiteb = 	{"stationbutton", {title =  "<" }},
+	addwhite = 			{"stationbutton", {title =  "Add as Friendly Guild",expand = "HORIZONTAL" }},
+	addblack = 			{"stationbutton", {title =  "Add as Enemy Guild",expand = "HORIZONTAL" }},
 
-	removewhite = 	{kind = "stationbutton", title = "Remove Friendlly Guild", args = {expand = "HORIZONTAL"}},
-	removeblack = 	{kind = "stationbutton", title = "Remove Enemy Guild", args = {expand = "HORIZONTAL"}}
+	removewhite = 	{"stationbutton", {title =  "Remove Friendlly Guild",expand = "HORIZONTAL"}},
+	removeblack = 	{"stationbutton", {title =  "Remove Enemy Guild",expand = "HORIZONTAL"}}
 }
 
-tcs.BatchAddTitledControls(mui.gtitles, mui)
+tcs.BatchAddControls(mui.gcontrols, mui)
 
 mui.blacklist = iup.pdasubsubsublist { value = 0, size = "x160", expand = "HORIZONTAL" }
 mui.whitelist = iup.pdasubsubsublist { value = 0, size = "x160", expand = "HORIZONTAL" }
@@ -337,19 +374,19 @@ function mui.blacktowhiteb:action()
 end
 
 --Lists of people. NSA is watching.
-mui.ptitles = {
-	fandecloseb = {kind= "stationbutton", title = "Close & Save", args = {expand = "HORIZONTAL"}},
+mui.pcontrols = {
+	fandecloseb = {"stationbutton", {title =  "Close & Save",expand = "HORIZONTAL"}},
 
-	leftbutton = {kind="stationbutton", title = "<" },
-	rightbutton = {kind="stationbutton", title = ">" },
+	leftbutton = {"stationbutton", {title =  "<"} },
+	rightbutton = {"stationbutton", {title =  ">" }},
 
-	addfriend = {kind="stationbutton", title = "Add as Friend", args = {expand = "HORIZONTAL" }},
-	removeselectedfriend = {kind="stationbutton", title = "Remove Selected Friend", args = {expand = "HORIZONTAL" }},
-	addenemy = {kind="stationbutton", title = "Add as Enemy", args = {expand = "HORIZONTAL" }},
-	removeselectedenemy = {kind="stationbutton", title = "Remove Selected Enemy", args = {expand = "HORIZONTAL" }}
+	addfriend = {"stationbutton", {title =  "Add as Friend",expand = "HORIZONTAL" }},
+	removeselectedfriend = {"stationbutton", {title =  "Remove Selected Friend",expand = "HORIZONTAL" }},
+	addenemy = {"stationbutton", {title =  "Add as Enemy",expand = "HORIZONTAL" }},
+	removeselectedenemy = {"stationbutton", {title =  "Remove Selected Enemy",expand = "HORIZONTAL" }},
 }
 
-tcs.BatchAddTitledControls(mui.ptitles, mui)
+tcs.BatchAddControls(mui.pcontrols, mui)
 
 mui.enemybox = iup.pdasubsubsublist { value = 0, size = "x350", expand = "HORIZONTAL" }
 mui.friendlybox = iup.pdasubsubsublist { value = 0, size = "x350", expand = "HORIZONTAL" }
@@ -704,18 +741,17 @@ mui.valent.action = fac_color
 mui.orion.action = fac_color
 mui.guild.action = fac_color
 mui.group.action = fac_color
-mui.NPC.action = fac_color
+--mui.NPC.action = fac_color
 mui.buddies.action = fac_color
 mui.tunguska.action = fac_color
 mui.biocom.action = fac_color
 
-local function npc_color(self,v)
-	if(v == 1) then
-		iup.SetAttribute(self, "FGCOLOR", "255 0 0")
-	else
-		iup.SetAttribute(self, "FGCOLOR", "255 255 255")
-	end
+local function npc_color(self,_,v)
+	local c = (v==1 and "255 204 241") or (v==2 and "255 0 0") or "0 255 0"
+	iup.SetAttribute(self, "FGCOLOR", c)
 end
-
-mui.statg.action = npc_color
-mui.sf.action = npc_color
+mui.hive.action = function(self,_, v) npc_color(mui.hivestat,_, v) end
+mui.statg.action = function(self,_, v) npc_color(mui.statgstat,_, v) end
+mui.sf.action = function(self,_, v) npc_color(mui.sfstat,_, v) end
+mui.conq.action = function(self,_, v) npc_color(mui.conqstat,_, v) end
+mui.norm.action = function(self,_, v) npc_color(mui.normstat,_, v) end
