@@ -70,6 +70,10 @@ function mf.GetFriendlyStatus(charid)
 	elseif(FS["NPC"] and tSaS(name, "*")) then
 		if(FS["StatG"] and (tSaS(name, "*statio") or tSaS(name, "*marsha"))) then return 0 end
 		if(FS["SF"] and (tSaS(name, "*stri") or tSaS(name, "*aerna se"))) then return 0 end
+		if(FS["Conq"] and (tSaS(name, "*CONQU")) then
+			--Do some extra logic to check keys here
+			return 0
+		end
 		return 3
 	else
 		if(mf.factions[GetPlayerFaction(charid)]) then
