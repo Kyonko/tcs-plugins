@@ -102,7 +102,7 @@ function mf.GetFriendlyStatus(charid)
 	elseif(FS["Buddy"] and tcs.IsBuddy(charid)) then
 		return 3
 	--Check if player chose to force Conquerable assets here to red or green
-	elseif(NPC and tSaS(name, "*conqu")) then 
+	elseif(NPC and faction == 0 and name:match("%a+ %d+")) then 
 		if(FS["Conq"] == 1) then
 			return mf.conq_sector_friendly_status()
 		end
