@@ -107,7 +107,7 @@ function mf.GetFriendlyStatus(charid)
 			return mf.conq_sector_friendly_status()
 		end
 		return (FS["Conq"]==3 and 3) or 0 
-	elseif(NPC and (FS["Hive"]~= 1) and faction==0) then 
+	elseif(NPC and (FS["Hive"]~= 1) and faction==0 and not tSaS(name, "*statio")) then 
 		return (FS["Hive"]==3 and 3) or 0
 
 	elseif(NPC and (FS["StatG"] ~= 1) and tSaS(name, "*statio") or tSaS(name, "*marsha")) then 
