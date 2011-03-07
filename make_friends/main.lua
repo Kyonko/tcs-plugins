@@ -80,6 +80,7 @@ end
 function mf.GetFriendlyStatus(charid)
 	local name = string.lower(GetPlayerName(charid))
 	local NPC = tSaS(name, "*")
+	local use_faction = false
 	local guild_tag = string.lower(GetGuildTag(charid))
 	local faction = GetPlayerFaction(charid) or 0
 	if((FS["FlagHostile"] == true) and mf.LastAggro[charid]) then
@@ -106,32 +107,39 @@ function mf.GetFriendlyStatus(charid)
 		if(FS["Conq"] == 1) then
 			return mf.conq_sector_friendly_status()
 		end
-		return (FS["Conq"]==3 and 3) or 0 
+		if not FS["Conq"] == 4 then
+			return (FS["Conq"]==3 and 3) or 0 
+		end
+		use_faction = true
 	elseif(NPC and (FS["Hive"]~= 1) and faction==0 and not tSaS(name, "*statio")) then 
-		return (FS["Hive"]==3 and 3) or 0
-
+		if not FS["Hive"] == 4 then
+			return (FS["Hive"]==3 and 3) or 0
+		end
+		use_faction = true
 	elseif(NPC and (FS["StatG"] ~= 1) and tSaS(name, "*statio") or tSaS(name, "*marsha")) then 
-		return (FS["StatG"]==3 and 3) or 0 
+		if not FS["StatG"] == 4 then
+			return (FS["StatG"]==3 and 3) or 0 
+		end
+		use_faction = true
 	elseif(NPC and (FS["SF"] ~= 1) and tSaS(name, "*stri") or tSaS(name, "*aerna Se")) then 
-		return (FS["SF"]==3 and 3) or 0 
+		if not FS["SF"] == 4 then
+			return (FS["SF"]==3 and 3) or 0 
+		end
+		use_faction = true
 	elseif(NPC and (FS["norm"] ~= 1)) then
-		return (FS["norm"]==3 and 3) or 0
-	else
-		if(mf.factions[faction]) then
-			return 3
+		if not FS["norm"] == 4 then
+			return (FS["norm"]==3 and 3) or 0
 		end
-		if(FS["ConsiderStanding"]) then
-  			local myfaction = GetPlayerFaction() or 0
-  			if (faction == 0) or (myfaction == 0) then return 0 end
-
-  			local val = 0
-  			if (GetPlayerFactionStanding(myfaction, charid) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
-  			if (GetPlayerFactionStanding(faction) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
-  			if (GetPlayerFactionStanding("sector", charid) or FactionStanding.Neutral) > FactionStanding.Hate then val = val + 1 end
-  			return val
-		end
-		return 0
+		use_faction = true
 	end
+	if(mf.factions[faction]) then
+		return 3
+	end
+	if(FS["ConsiderStanding"] or use_faction) then
+		--Use VO's GetFriendlyStatus function
+		return mf.GetFriendlyStatus_OLD(charid)
+	end
+	return 0
 end
 if mf.state == 1 then 
 	GetFriendlyStatus = mf.GetFriendlyStatus
