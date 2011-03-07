@@ -31,6 +31,22 @@ local function setup_hud()
 	iup.Append(distanceindicator, HUD.locationtext)
 	iup.Append(distanceindicator, iup.fill{size="30"})
 	iup.Append(distanceindicator, HUD.sectoralignmenttext)
+	
+	
+	local layer2 = tcs.GetRelative(HUD.hitby_text, 1)
+	c = iup.GetNextChild(layer2, HUD.logoff_text)
+	while c do
+		t_c = iup.GetNextChild(layer2, c)
+		iup.Detach(c)
+		c = t_c
+	end
+	iup.Append(layer2, iup.fill{size=tostring(30*HUD_SCALE)})
+	iup.Append(layer2, HUD.hitby_text)
+	iup.Append(layer2, HUD.notify_text)
+	iup.Append(layer2, HUD.help_text)
+	iup.Append(layer2, iup.fill{})
+	
+	
 	distanceindicator:show()
 	iup.Refresh(distanceindicator)
 end
