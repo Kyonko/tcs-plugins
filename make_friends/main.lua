@@ -287,7 +287,7 @@ local function fac_defs(fs_def, ui_elm)
 end
 
 local function npc_defs(fs_def, ui_elm, stat_elm)
-	local color = (fs_def==1 and "255 204 241") or (fs_def==2 and "255 0 0") or "0 255 0"
+	local color = (fs_def==1 and "255 204 241") or (fs_def==2 and "255 0 0") or (fs_def==3 and "0 255 0") or "255 255 255"
 	if(stat_elm) then stat_elm.fgcolor = color end
 	if(ui_elm) then ui_elm.value = fs_def end
 end

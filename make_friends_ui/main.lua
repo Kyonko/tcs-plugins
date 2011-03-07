@@ -747,7 +747,7 @@ mui.tunguska.action = fac_color
 mui.biocom.action = fac_color
 
 local function npc_color(self,_,v)
-	local c = (v==1 and "255 204 241") or (v==2 and "255 0 0") or "0 255 0"
+	local c = (v==1 and "255 204 241") or (v==2 and "255 0 0") or (v == 3 and "0 255 0") or "255 255 255"
 	iup.SetAttribute(self, "FGCOLOR", c)
 end
 mui.hive.action = function(self,_, v) npc_color(mui.hivestat,_, v) end
