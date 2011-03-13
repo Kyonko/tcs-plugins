@@ -105,6 +105,7 @@ function tcs.multiaim.CreateLeadoffArrows()
 end
 
 function tcs.multiaim.UpdateLeadoffArrowVisibility()
+	if not GetCharacterID() then return end
 	local first = false
 	HUD.leadofflayer.visible = "NO"
 	for portid in pairs(tcs.multiaim.leads) do
