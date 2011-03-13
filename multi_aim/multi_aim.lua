@@ -62,10 +62,10 @@ end
 tcs.multiaim.leads = {}
 local xres = gkinterface.GetXResolution()*HUD_SCALE
 local iconsize = math.floor(xres*.04)
-
-
-tcs.leadoff_arrow = iup.hbox { 
-						iup.radar {
+							
+function tcs.multiaim.CreateLeadoffArrows()
+	
+	tcs.leadoff_arrow = iup.radar {
 							type = "LEADOFF",
 							image = OLD_IMAGE_DIR .. "hud_target.png",
 							imageover = OLD_IMAGE_DIR .. "hud_target_over.png",
@@ -73,15 +73,20 @@ tcs.leadoff_arrow = iup.hbox {
 							bgcolor = "255 255 255 255 &",
 							expand = "NO",
 							active = "NO",
-							portid = 2
-						},
-						iup.fill{}
-					}
-							
-function tcs.multiaim.CreateLeadoffArrows()
+						}
+
+						--VO updates the leadoff arrow to some dumb value when things happen. So we'll replace it
+	tcs.leadofflayer = iup.hbox { 
+							tcs.leadoff_arrow,
+							iup.fill{}
+						}
 	if(not GetActiveShipNumAddonPorts()) then return end
-	local paren = iup.GetParent(HUD.leadoff_arrow)
-	iup.Append(paren, tcs.leadoff_arrow)
+	local ren = iup.GetParent(HUD.leadofflayer)
+	HUD.leadofflayer.visible = "NO"
+	local paren = iup.hbox {tcs.leadofflayer}
+	iup.Append(ren, paren) 
+	
+	--iup.Append(paren, tcs.leadoff_arrow)
 	for i = 2, 6 do
 		tcs.multiaim.leads[i] = {}
 		tcs.multiaim.leads[i].icon, tcs.multiaim.leads[i].leadoff, tcs.multiaim.leads[i].addon = GenerateLeadoffIcon(i)
@@ -91,24 +96,32 @@ function tcs.multiaim.CreateLeadoffArrows()
 	iup.Detach(HUD.leadoff_arrow)
 	--tcs.leadoff_arrow = iup.hbox { HUD.leadoff_arrow }
 	iup.Destroy(HUD.leadoff_arrow)
-	HUD.leadoff_arrow = iup.label{title = ""}
-	iup.Append(paren, HUD.leadoff_arrow)
+	HUD.leadoff_arrow = iup.label { title = "" }
+	iup.Append(HUD.leadofflayer, HUD.leadoff_arrow)
+	--iup.Append(tcs.leadoff_arrow, iup.fill{})
+	--iup.Append(paren, tcs.leadoff_arrow)
 
 	return
 end
 
 function tcs.multiaim.UpdateLeadoffArrowVisibility()
+	local first = false
+	HUD.leadofflayer.visible = "NO"
 	for portid in pairs(tcs.multiaim.leads) do
 		if((not GetActiveShipItemIDAtPort(portid)) or (tcs.multiaim.state == 0)) then
 			tcs.multiaim.leads[portid].icon.visible = "NO"
+			if(GetActiveShipItemIDAtPort(portid) and not first) then
+				tcs.leadoff_arrow.portid = portid
+				first = true
+			end
 		else
 			tcs.multiaim.leads[portid].icon.visible = "YES"
 		end
 	end
-	if(tcs.multiaim.state == 1) then 
-		tcs.leadoff_arrow.visible = "NO"
+	if(tcs.multiaim.state == 1 or not first) then 
+		tcs.leadofflayer.visible = "NO"
 	else
-		tcs.leadoff_arrow.visible = "YES"
+		tcs.leadofflayer.visible = "YES"
 	end
 end
 
@@ -128,14 +141,17 @@ function tcs.multiaim:OnEvent(event, data)
 			tcs.multiaim.loaded = true
 		end
 		tcs.multiaim.UpdateLeadoffArrowVisibility()
-	end
-	if(event == "LEAVING_STATION") then
+	elseif(event == "LEAVING_STATION") then
 		tcs.multiaim.UpdateLeadoffIcons()
+	elseif(event == "rHUDxscale") then
+		tcs.multiaim.CreateLeadoffArrows()
+		tcs.multiaim.UpdateLeadoffArrowVisibility()
 	end
 end
 
 RegisterEvent(tcs.multiaim, "SHIP_SPAWNED")
 RegisterEvent(tcs.multiaim, "LEAVING_STATION")
+tcs.RegisterHudScaleEvent(tcs.multiaim)
 if(GetCharacterID()) then
 	tcs.multiaim.CreateLeadoffArrows()
 	tcs.multiaim.UpdateLeadoffArrowVisibility()
