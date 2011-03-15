@@ -71,7 +71,8 @@ function load_libs()
 		"alert_machine",
 		"auto_nav",
 		"central_info",
-		"chain_fire",
+--		"chain_fire", --UNDER DEVELOPMENT
+		"chain_fire_old",
 		"make_friends",
 		"multi_aim",
 		"vo_clock",

@@ -1,194 +1,195 @@
 local name = "CFire"
+
 tcs.cfire = {}
-tcs.cfire.ui = {}
+local cf = tcs.cfire
+local gkpc = gkinterface.GKProcessCommand
+local ERROR = tcs.ERROR
+local INFO = tcs.INFO
+local cli_cmd = {cmd = "cfire", interp = nil}
 
-tcs.cfire.gkpc = gkinterface.GKProcessCommand
-tcs.cfire.ui.halpb = iup.stationbutton{title = "Help", action = function()
-											StationHelpDialog:Open(
-[[This module writes chainfire binds based in the information you input in the window.
-												
-Firstly, you'll need to set up your weapons groups in the station on your own. Pretty harsh, but eh.
-												
-If you wish to use primary fire for your chains, set up weapon groups x through y on primary fire. Likewise if you wish to use secondary fire, you should set up weapon groups x through y to use secondary fire.
-
-Once that's all done, you can configure cfire to write your binds. The boxes under the groups determine which weapon groups you wish to cycle through. I cannot guarantee good results if you use a number outside of 1 through 6. Lower number goes in the first box, higher in the second. Do elsewise and things probably will break.
-												
-When finished with that, enter the delay you want. The built-in VO timer has a resolution of .01 seconds. Don't do anything smaller or stuff breaks. Likewise, if you input \"lawls\" into the Delay field, you're probably going to end up with broken binds and spilt milk.
-												
-Trigger selection is just a selection of which trigger you're going to use, primary, secondary, or tertiery. You need to have your weapon groups set up to use all the same trigger or again, stuff breaks. But it's your fault when stuff breaks, so onward!
-												
-Manual timing, if checked, indicated you don't want to cycle with a delay, instead you wish to cycle every time you press the fire trigger. I like this for rockets, press firetrigger and one rocket goes, press again and another, etc.
-												
-Now you're almost done! Just hit Write Alias and the script will generate your chainfire alias. It also prints out the command you need to bind, but you'll need to close the chainfire dialog by hitting close to see it. It's always +cfire1, +cfire2, or +cfire3 depending on which trigger you wanted to use(You can have up to three different chainfire setups.)
-]])
-											end}
-tcs.cfire.ui.closeb = iup.stationbutton{title = "Close"}
-tcs.cfire.ui.writeb = iup.stationbutton{title = "Write Alias"}
-tcs.cfire.ui.manualtoggle = iup.stationtoggle{title = "Use Manual Timing", state = "OFF"}
-tcs.cfire.ui.primary = iup.stationtoggle{title = "1st    ", state = "OFF"}
-tcs.cfire.ui.secondary = iup.stationtoggle{title = "2nd    ", state = "OFF"}
-tcs.cfire.ui.tertiary = iup.stationtoggle{title = "3rd", state = "ON", value = "ON"}
-tcs.cfire.ui.cvarPri = false
-tcs.cfire.ui.cvarSec = false
-tcs.cfire.ui.cvarTer = true
-tcs.cfire.ui.cvarManToggle = false
-
-tcs.cfire.ui.title = iup.label {title = "Chainfire Alias Writer"}
-tcs.cfire.ui.fgroup = iup.text{value="1", size="50x"}
-tcs.cfire.ui.lgroup = iup.text{value="3", size="50x"}
-tcs.cfire.ui.delay = iup.text{value=".01", size="50x"}
-
-tcs.cfire.ui.titlebox = iup.hbox {
-	iup.vbox {
-		tcs.cfire.ui.title
-	}
+--[[----------CVARS----------]]--
+--cvar = {savename, current, default}
+cf.cvars = {
+	auto_delay = {"cfire_auto_delay",true,true},
+	delay	   = {"cfire_delay",.07,.07},
 }
+local cvars = cf.cvars
 
-tcs.cfire.ui.params = iup.vbox {
-	iup.hbox{
-		iup.label{title = "     Groups"},
-		iup.fill{},
-		iup.label{title="Delay "};
-		margin = "5x0"
-	},
-	iup.hbox {
-		tcs.cfire.ui.fgroup,
-		iup.label{ title = "~"},
-		tcs.cfire.ui.lgroup,
-		iup.fill{},
-		tcs.cfire.ui.delay;
-		margin = "5x0"
-	},
-	iup.radio{
-		iup.hbox {
-			iup.label{title = "Use Trigger: "},
-			iup.fill{},
-			tcs.cfire.ui.primary,
-			tcs.cfire.ui.secondary,
-			tcs.cfire.ui.tertiary;
-			margin = "5x0"
-		}
-	}	
-}
+cd.MIN_DELAY = .02
 
-tcs.cfire.ui.mantoggle = iup.hbox {
-	iup.fill{},
-	tcs.cfire.ui.manualtoggle;
-	margin = "5x0"
-}
+cf.cfires = {}
+local cfires = cf.cfires
 
-tcs.cfire.ui.controls = iup.hbox {
-	tcs.cfire.ui.halpb,
-	iup.fill{},
-	tcs.cfire.ui.writeb,
-	tcs.cfire.ui.closeb
-}
-
-local dlg = {
-	tcs.cfire.ui.params,
-	iup.fill{},
-	tcs.cfire.ui.mantoggle,
-	tcs.cfire.ui.controls,
-	alignment="ACENTER",gap=5
-}
-
-tcs.cfire.maindlg = tcs.ConfigConstructor("Chainfire Alias Writer", dlg, {SIZE="300x175"})
-
-function tcs.cfire.close()
-	HideDialog(tcs.cfire.maindlg)
-	tcs.cli_menu_adjust(name)
-end
-
-function tcs.cfire.ui.closeb:action()
-	tcs.cfire.close()
-end
-
-function tcs.cfire.ui.primary:action(v)
-	if(v == 1) then
-		tcs.cfire.ui.cvarPri = true
-	else
-		tcs.cfire.ui.cvarPri = false
-	end
-end
-
-function tcs.cfire.ui.secondary:action(v)
-	if(v == 1) then
-		tcs.cfire.ui.cvarSec = true
-	else
-		tcs.cfire.ui.cvarSec = false
-	end
-end
-
-function tcs.cfire.ui.tertiary:action(v)
-	if(v == 1) then
-		tcs.cfire.ui.cvarTer = true
-	else
-		tcs.cfire.ui.cvarTer = false
-	end
-end
-
-function tcs.cfire.ui.manualtoggle:action(v)
-	if(v == 1) then
-		tcs.cfire.ui.cvarManToggle = true
-	else
-		tcs.cfire.ui.cvarManToggle = false
-	end
-end
-
-function tcs.cfire.ui.writeb:action()
-	local nodelay = tcs.cfire.ui.cvarManToggle
-	local pri = tcs.cfire.ui.cvarPri
-	local sec = tcs.cfire.ui.cvarSec
-	local ter = tcs.cfire.ui.cvarTer
-	local fgroup = tonumber(iup.GetAttribute(tcs.cfire.ui.fgroup, "value"))
-	local lgroup = tonumber(iup.GetAttribute(tcs.cfire.ui.lgroup, "value"))
-	local delay = tonumber(iup.GetAttribute(tcs.cfire.ui.delay, "value"))
-	local next = 0
-	local i = 0
-	local trigger = 0 
-	local damnVO = 0
 	
-	--Horsies!
-	-- Thanks to VO being weird, damnVO is to correct for +shoot1 being secondary trigger and +shoot2 being primary trigger. Gar
-	if(pri == true) then
-		trigger = 1
-		damnVO = 2
-	elseif(sec == true) then
-		trigger = 2
-		damnVO = 1
-	else 
-		trigger = 3
-		damnVO = 3
-	end
+cf.auto_delay = gkini.ReadInt("tcs", "cfire_auto_delay", 1)==1
 
-	--First, the gruntwork alias state machine.
-	--Each set has its own state machine to run off of so things don't get tangled. That would be bad. We don't like tangles.
-	i = fgroup
-	tcs.cfire.gkpc("alias cfireswitch"..trigger.." \"cfiregrunt"..i.."_"..trigger.."\"")
-	while(i <= lgroup) do
-		next = i + 1
-		if(i ~= lgroup) then
-			tcs.cfire.gkpc("alias cfiregrunt"..i.."_"..trigger.." \"Weapon"..i.."; alias cfireswitch"..trigger.." cfiregrunt"..next.."_"..trigger.."\"")
-		else 
-			tcs.cfire.gkpc("alias cfiregrunt"..i.."_"..trigger.." \"Weapon"..i.."; alias cfireswitch"..trigger.." cfiregrunt"..fgroup.."_"..trigger.."\"")
+--Two is primary, One is secondary, Three is tertiary in VO. We're going to name things sane here
+local pshoot1 = function() gkpc("+shoot2") end
+local mshoot1 = function() gkpc("+shoot2 0") end
+local pshoot2 = function() gkpc("+shoot1") end
+local mshoot2 = function() gkpc("+shoot1 0") end
+local pshoot3 = function() gkpc("+shoot3") end
+local mshoot3 = function() gkpc("+shoot3 0") end
+--This function updates cfire cvars based on current settings and weapons ports
+function cf.UpdateChains() 
+	local delay = cvars.auto_delay[2] and cf.CalcAutoDelay() or cvars.delay[2]
+	
+
+end
+
+function cf.ToggleSingleSalvo(cfire)
+	cfire = tonumber(cfire)
+	if not cfire or not cfires[cfire] then 
+		ERROR("Invalid input. Please enter the ID of a valid cfire setting.")
+		return 
+	end
+	if(not cfires[cfire]
+	cfires[cfire].single = not cfires[cfire].single
+	--Reset from single to not-single
+	cfires[cfire]:off()
+	cfires[cfire]:on()
+	if 		cfires[cfire].single and cfires[cfire].sqwak_single then INFO("CFire"..cfire.." set to single salvo.") 	return end
+	if  not	cfires[cfire].single and cfires[cfire].sqwak_single then INFO("CFire"..cfire.." set to chain fire.") 	return end
+end
+
+function cf.WriteCFires(cfire, chain) 
+	--Call with cfires[cfire]:<on|off>
+	local cfiret = cfires[cfire]
+	
+	function cfiret:incr_fire()
+		--Kill last chain, process current chain, and then increment
+		self.chain[self.chain_num-1].off()
+		if self.chain_num > #self.chain then
+			self.chain_num = 1
 		end
-		i = i + 1
+		self.chain[self.chain_num].on()
+		self.chain_num = self.chain_num + 1
 	end
-
-	--Now on to control structures
 	
-	if(nodelay == true) then
-		tcs.cfire.gkpc("alias +cfire"..trigger.." \"+Shoot"..damnVO)
-		tcs.cfire.gkpc("alias -cfire"..trigger.." \"+Shoot"..damnVO.." 0; cfireswitch"..trigger.."\"")
-		print("Now merely bind +cfire"..trigger.." to your preferred button and it will work. Made without delay.")
-	else
-		tcs.cfire.gkpc("alias +cfire"..trigger.." \"+Shoot"..damnVO.."; cfiremakeloop"..trigger.."; cfirelstart"..trigger.."\"")
-		tcs.cfire.gkpc("alias cfirelstart"..trigger.." \"cfireloop"..trigger.."; alias cfirelstart"..trigger.." none\"")
-		tcs.cfire.gkpc("alias cfireloop"..trigger.." none")
-		tcs.cfire.gkpc("alias cfiremakeloop"..trigger.." \"alias cfireloop"..trigger.." \'cfireswitch"..trigger.."; wait "..delay.." cfireloop"..trigger.."\'\"")
-		tcs.cfire.gkpc("alias -cfire"..trigger.." \"+Shoot"..damnVO.." 0 ; alias cfireloop"..trigger.." none; alias cfirelstart"..trigger.." \'cfireloop"..trigger.."; alias cfirelstart"..trigger.." none\'\"")
-		print("Now bind +cfire"..trigger.." to something and it should work. Made with "..delay.."s delay.")
+	function cfiret:on()
+		if not self.single then
+			self:incr_fire()
+			if not self.manual then 
+				self.timer.SetTimeout(self.delay, function()
+					pcall(function()
+						self:incr_fire()
+					end)
+					--User defined/first-up or slowest common/arithmetic mean 
+					self.timer.SetTimeout(self.chain[self.chain_num-1].delay or self.delay)
+				end			
+			end
+		else
+			--Turn everything on if single-salvo!
+			for dex, chain in ipairs(self.chain) do
+				chain.on()
+			end
+		end
+	end
+		
+	function cfiret:off()
+		--Kill our cfire timer and turn everything in the chains off
+		self.timer.Kill()
+		for dex, chain in ipairs(self.chain) do
+			chain.off()
+		end
+	end
+		
+	cfiret.chain_num = 1
+	cfiret.chain = chain
+	--Base commands vanish, so nobody gets to bind. Instead, we'll alias them to human-readable commands
+	RegisterUserCommand(("__cfire__%d__base__on"):format(cfire), function() cfires[cfire]:on() end)
+	RegisterUserCommand(("__cfire__%d__base__off"):format(cfire), function() cfires[cfire]:off() end)
+	RegisterUserCommand(("__cfire__%d__base__salvo__toggle"):format(cfire), function() cf.ToggleSingleSalvo(cfire) end)
+	gkpc(("alias +cfire%d __cfire__%d__base__on"):format(cfire, cfire))
+	gkpc(("alias -cfire%d __cfire__%d__base__off"):format(cfire, cfire))
+	gkpc(("alias cfire%d_salvo_toggle __cfire__%d__base__salvo__toggle"):format(cfire, cfire))
+	
+end
+
+function cf.WriteChains()
+--dear god what the fuck
+end
+
+function cf.InitCfires()
+	cf.LoadCfires()
+	for dex, cfire in pairs(cfires) do
+		cfire.timer = Timer()
 	end
 end
-local cli_cmd = {cmd ="cfire", interp = nil}
-tcs.ProvideConfig(name, tcs.cfire.maindlg, "Chainfire Alias Writer", cli_cmd)
+--Configures ship ports as necessary
+function cf.UpdatePorts()
+
+end
+
+function cf.CalcAutoDelay()
+	local delay = 0
+	local port_num = GetActiveShipNumAddonPorts() -1 --dealing with engine via subtraction, yay!
+	local ports = {}
+	local ports_same = -1
+	local slowest_port
+	for i=2, port_num do
+		port_type = GetActiveShipPortInfo(i).type
+		if(port_type == 0 or port_type == 1) then
+			ports[i] = cf.ParseWeaponDelay(portid)
+			if(ports_same == -1) then
+				ports_same = true
+				slowest_port = ports[i]
+			elseif ports[i] ~= slowest_port then 
+				ports_same = false 
+				if ports[i] < slowest_port then slowest_port = ports[i] end
+			end
+		end
+		i = i+1
+	end
+	
+	--If not different, just send this back
+	if ports_same then return ports[1] end
+	--If told to use arithmetic mean, do so
+	if cf.use_mean then
+		for dex, port_delay in ipairs(ports) do
+			delay = delay + port_delay
+		end
+		return delay/#ports
+	end
+	--Else use slowest_port
+	return slowest_port
+end
+
+function cf.ParseWeaponDelay(portid)
+	--Does as above. Returns minimum delay if not found
+	local _, _, _, _, _, desc1, desc2 = GetInventoryItemInfo(GetActiveShipItemIDAtPort(portid))
+	local delay = tonumber(tcs.desc1:match("Delay: -([%d%.]+)s") or tcs.desc2:match("Delay: -([%d%.]+)s"))
+	return delay or cf.MIN_DELAY
+end
+
+--Reads and loads cvars in a standardish way
+--Maybe convert all plugins to using this someday?
+--Cvars format:
+-- <plugtable>.cvars = { cvar = {"savename",<current_value>,<default_value>}, ... }
+-- Function takes care of decision to use Int/String when Read/Write
+function tcs.SavePluginSettings(cvars)
+	for cvar, data in pairs(cvars) do
+		--Need to check if integer to use WriteInt
+		if(type(data[3]) == "number" and data[3]%1==0) then
+			gkini.WriteInt("tcs", data[1], tonumber(data[2]))
+		elseif(type(data[3]) == "boolean") then
+			gkini.WriteInt("tcs", data[1], data[2] and 1 or 0)
+		else
+			gkini.WriteString("tcs", data[1], tostring(data[2]))
+		end
+	end
+end
+
+function tcs.LoadPluginSettings(cvars)
+	for cvar, data in pairs(cvars) do 
+		if(type(data[3]) == "number" and data[3]%1==0) then
+			data[2] = gkini.ReadInt("tcs", data[1], data[3])
+		elseif(type(data[3]) == "boolean") then
+			data[2] = gkini.ReadInt("tcs", data[1], data[3] and 1 or 0)==1
+		else
+			data[2] = gkini.ReadString("tcs", data[1], tostring(data[3]))
+		end
+	end
+end
+			
+		

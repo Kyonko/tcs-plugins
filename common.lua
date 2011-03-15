@@ -4,6 +4,15 @@ tcs.VERSION = "1.4SUB2"
 --If you don't know the terrible secret of TCS, then this variable will do nothing for you.
 tcs.noSHA1 = true
 
+
+function tcs.ERROR(str)
+	print("\127ff2020ERROR: %s"):format(str)
+end
+
+function tcs.INFO(str)
+	print("\127ffffff%s"):format(str)
+end
+
 --Declares and adds a whole bunch of controls to a host table for use by iup
 --Table entries should look like so:
 -- "name" = {kind = "<iup control>", <title = "This thingy"|value = "whatever"|(nothing)>[,args={iup_arg = "arg", ...}]
