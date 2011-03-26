@@ -67,8 +67,9 @@ function mf.conq_sector_friendly_status()
 	end
 	for i=1, GetNumKeysInKeychain() do
 		local key, sector, res = {GetKeyInfo(i)}, ShortLocationStr(sectorid), false
-		if(key[2]:find(sector, 15, "plain")) then
-			res = ((not key[3]) and true) or key[7]
+		if(key[2]:lower():find(sector:lower(), 1, true)) then
+			--If active and ((NOT owner) OR (datatable AND iff))
+			res = key[7] and ((not key[3]) or (key[5] and key[5][1][2].iff))
 			oldsectorid, old_keyid, oldsector_conq_friendly_status, conq_status_invalid = sectorid, i, res, false
 			return (res and 3) or 0
 		end
