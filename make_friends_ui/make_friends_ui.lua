@@ -158,8 +158,8 @@ local elems = {
 mui.dlg = tcs.ConfigConstructor("MakeFriends Config", elems, {defaultesc=tcs.mf.ui.closeb})
 
 function mui.dlg:init()
-	tcs.mf.GetFriends()
 	iup.Map(mui.dlg)
+	tcs.mf.GetFriends()
 	local closesavewidth = tcs.GetElementSize(mui.closeb) + tcs.GetElementSize(mui.makefriendsb)
 	mui.savepresetb.size = closesavewidth .. "x"
 	mui.presetsb.size = closesavewidth .. "x"
