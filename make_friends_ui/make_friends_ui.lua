@@ -1,6 +1,6 @@
 tcs.mf.ui = {} --The help dialog
 local mui = tcs.mf.ui --Binding for main UI
-mui.halpmsg = "Welcome to Make Friends, the radar customization applet!\n\n\tThe main window lets you select what overall groups/factions appear red or green on your radar. If the toggle is colored red, it will appear red on your radar. Likewise if the toggle is colored green. \"Categories\" toggles and \"NPCs\" controls take precedence over \"Factions\" toggles- namely, if you have certain NPC's or your guildmates set as friendly/green, then you can't turn those NPCs or your guildmates red no matter what factions you configure to be hostile. \n\n\tA note about the \"Conquerable Assets\": MakeFriends doesn't yet have full support to figure out who has the right IFF settings in a conquerable sector, but it can figure out if the turrets hate you or not. Having MakeFriends treat the turrets \"As Player\" enables this logic.\n\n\tThe Friends and Enemies lists windows allows you to specify people or guilds who are always green or always red on radar, respectively. The enemies list takes precedence over the friends list, so any person or guild on the enemies list is always red even if you have them put down in the friends list eighty times. To ignore your friends and enemies lists, for Nation War or some other team event, check the relevant toggles in the main window. Click on the \"Edit Lists\" button to access the edits for manual editing of these lists. Use the \"Edit People Lists\" button to manage individual players, and the \"Edit Guild Lists\" to manage guilds. Do not use quotes when entering players who have more than one word in their name, and on the guilds list, only use the acronym of a guild when adding entries.\n\n\tThe toggles on the bottom-left of the main window are used, respectively, to:\n\t\t- Pretend your enemy players list is empty\n\t\t- Pretend your enemy guilds list is empty\n\t\t- Pretend your friendly players list is empty\n\t\t- Pretend your friendly guilds list is empty\n\t\t- Take a player\'s faction standing into account when showing them on the radar\n\t\t- If you are hit by another player they will be red for the amount of time displayed\n\t\tin the box, and if you hit another player, your CURRENT TARGET will be red for\n\t\thowever many minutes are displayed in the box\n\n\tThe Save Presets button will prompt you for a name to save your current toggle settings as. WARNING: Save Presets button will overwrite presets without warning. \n\n\tEdit Presets allows you to load or delete presets, or load the \'current\' defaults. If you have no presets or have just loaded the default presets, any changes you make to the toggles in the main window will be reflected in the default preset once you hit \"OK\". It is suggested that you make the defaults a setting you usually fly around as, and use presets for special circumstances(such as events).\n\n\tLastly, hit \"OK\" to save everything and all that good stuff.\n\n\tFor more advanced users, you can also use the following commands to reset lists of people who have hit you and are thusly marked red.\n\t\t- /tcs makefriends reset player\n\t\t- /tcs makefriends reset npc\n\t\t- /tcs makefriends reset all\n\n\tThe commands are a bit slipshod, but do as they say on the tin. Good luck!\n\n\n\nCredits:\nWritten by Scuba Steve 9.0.\nPre-TCS version 1.3.1 modified by raybondo.\nAlertMachine interface created from modified whois code written by Eonis Jannar.\nHelpfile for Pre-TCS MF v1.5.0 updated by Miharu."
+mui.halpmsg = "Welcome to Make Friends, the radar customization applet!\n\n\tThe main window lets you select what overall groups/factions appear red or green on your radar. If the toggle is colored red, it will appear red on your radar. Likewise if the toggle is colored green. \"Categories\" toggles and \"NPCs\" controls take precedence over \"Factions\" toggles- namely, if you have certain NPC's or your guildmates set as friendly/green, then you can't turn those NPCs or your guildmates red no matter what factions you configure to be hostile. \n\n\tA note about the \"Conquerable Assets\": MakeFriends doesn't yet have full support to figure out who has the right IFF settings in a conquerable sector, but it can figure out if the turrets hate you or not as long as the relevant key has a location formatted like 'Latos I-8' in the key name. Having MakeFriends treat the turrets \"As Player\" enables this logic. This logic does not affect station guards in conquerable sectors.\n\n\tThe Friends and Enemies lists windows allows you to specify people or guilds who are always green or always red on radar, respectively. The enemies list takes precedence over the friends list, so any person or guild on the enemies list is always red even if you have them put down in the friends list eighty times. To ignore your friends and enemies lists, for Nation War or some other team event, check the relevant toggles in the main window. Click on the \"Edit Lists\" button to access the edits for manual editing of these lists. Use the \"Edit People Lists\" button to manage individual players, and the \"Edit Guild Lists\" to manage guilds. Do not use quotes when entering players who have more than one word in their name, and on the guilds list, only use the acronym of a guild when adding entries.\n\n\tThe toggles on the bottom-left of the main window are used, respectively, to:\n\t\t- Pretend your enemy players list is empty\n\t\t- Pretend your enemy guilds list is empty\n\t\t- Pretend your friendly players list is empty\n\t\t- Pretend your friendly guilds list is empty\n\t\t- Take a player\'s faction standing into account when showing them on the radar\n\t\t- If you are hit by another player they will be red for the amount of time displayed\n\t\tin the box, and if you hit another player, your CURRENT TARGET will be red for\n\t\thowever many minutes are displayed in the box\n\n\tThe Save Presets button will prompt you for a name to save your current toggle settings as. WARNING: Save Presets button will overwrite presets without warning. \n\n\tEdit Presets allows you to load or delete presets, or load the \'current\' defaults. If you have no presets or have just loaded the default presets, any changes you make to the toggles in the main window will be reflected in the default preset once you hit \"OK\". It is suggested that you make the defaults a setting you usually fly around as, and use presets for special circumstances(such as events).\n\n\tLastly, hit \"OK\" to save everything and all that good stuff.\n\n\tFor more advanced users, you can also use the following commands to reset lists of people who have hit you and are thusly marked red.\n\t\t- /tcs makefriends reset player\n\t\t- /tcs makefriends reset npc\n\t\t- /tcs makefriends reset all\n\n\tThe commands are a bit slipshod, but do as they say on the tin. Good luck!\n\n\n\nCredits:\nWritten by Scuba Steve 9.0.\nPre-TCS version 1.3.1 modified by raybondo.\nAlertMachine interface created from modified whois code written by Eonis Jannar.\nHelpfile for Pre-TCS MF v1.5.0 updated by Miharu."
 
 mui.mcontrols = {
 	--Only place elements with 'title' as a basic element in this group. Too lazy to actually add in the edge cases. Oh well.
@@ -26,13 +26,15 @@ mui.mcontrols = {
 	hivestat = 	{"label", {title = "Hivebots", fgcolor="255 204 241"}},
 	statgstat = {"label", {title = "Station Guards",fgcolor="255 204 241"}},
 	sfstat = 	{"label", {title = "Strike Force", fgcolor="255 204 241"}},
+	borderstat= {"label", {title = "Wormhole Turrets", fgcolor="255 204 241"}},
 	conqstat = 	{"label", {title = "Conquerable Assets", fgcolor="255 204 241"}},
 	normstat = 	{"label", {title = "Other NPCs", fgcolor="255 204 241"}},
-	hive = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing"}},
-	statg = 	{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing"}},
-	sf = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing"}},
-	conq = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing"}},
-	norm = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing"}},
+	hive = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},
+	statg = 	{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},
+	sf = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},
+	border =	{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},
+	conq = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},
+	norm = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},
 	
 	igfriend =	{"stationtoggle",{ title = "Ignore Friend Players List",fgcolor="255 255 255" }},
 	igenemy = 	{"stationtoggle", {title = "Ignore Enemy Players List",fgcolor="255 255 255" }},
@@ -84,6 +86,7 @@ local elems = {
 			mui.statgstat,
 			mui.sfstat,
 			mui.conqstat,
+			mui.borderstat,
 			mui.normstat
 		},
 		mui.npcsspacer,
@@ -92,6 +95,7 @@ local elems = {
 			mui.statg,
 			mui.sf,
 			mui.conq,
+			mui.border,
 			mui.norm
 		},
 		iup.fill{}
@@ -122,8 +126,6 @@ local elems = {
 	iup.fill { size = "40" },
 	iup.hbox{
 		iup.vbox {
-			mui.statg,
-			mui.sf,
 			mui.igenemy,
 			mui.igenemyguild,
 			mui.igfriend,
@@ -216,6 +218,7 @@ function mui.makefriendsb:action()
 	tcs.mf.FS["Hive"] = tonumber(iup.GetAttribute(mui.hive, "VALUE"))
 	tcs.mf.FS["StatG"] = tonumber(iup.GetAttribute(mui.statg, "VALUE"))
 	tcs.mf.FS["SF"] = tonumber(iup.GetAttribute(mui.sf, "VALUE")) 
+	tcs.mf.FS["Border"] = tonumber(iup.GetAttribute(mui.border, "VALUE")) 
 	tcs.mf.FS["Conq"] = tonumber(iup.GetAttribute(mui.conq, "VALUE")) 
 	tcs.mf.FS["norm"] = tonumber(iup.GetAttribute(mui.norm, "VALUE"))
 	tcs.mf.FS["igEnemy"] = tcs.ToggleStateToBool(iup.GetAttribute(mui.igenemy, "VALUE"))
@@ -752,6 +755,7 @@ local function npc_color(self,_,v)
 end
 mui.hive.action = function(self,_, v) npc_color(mui.hivestat,_, v) end
 mui.statg.action = function(self,_, v) npc_color(mui.statgstat,_, v) end
+mui.border.action = function(self,_,v) npc_color(mui.borderstat,_,v) end
 mui.sf.action = function(self,_, v) npc_color(mui.sfstat,_, v) end
 mui.conq.action = function(self,_, v) npc_color(mui.conqstat,_, v) end
 mui.norm.action = function(self,_, v) npc_color(mui.normstat,_, v) end
