@@ -26,7 +26,7 @@ mui.mcontrols = {
 	hivestat = 	{"label", {title = "Hivebots", fgcolor="255 204 241"}},
 	statgstat = {"label", {title = "Station Guards",fgcolor="255 204 241"}},
 	sfstat = 	{"label", {title = "Strike Force", fgcolor="255 204 241"}},
-	borderstat= {"label", {title = "Wormhole Turrets", fgcolor="255 204 241"}},
+	borderstat= {"label", {title = "Faction Defense Turrets", fgcolor="255 204 241"}},
 	conqstat = 	{"label", {title = "Conquerable Assets", fgcolor="255 204 241"}},
 	normstat = 	{"label", {title = "Other NPCs", fgcolor="255 204 241"}},
 	hive = 		{"stationsubsublist", {dropdown = "YES", [1] = "\127FFCCF1As Player", [2] = "\127ff0000Hostile", [3] = "\12700ff00Friendly", [4] = "\127ffffffUse Faction Standing Only"}},

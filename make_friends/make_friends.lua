@@ -91,7 +91,7 @@ function mf.GetFriendlyStatus(charid)
 		conq = faction == 0 and name:match("turret %d*")
 		statg = tSaS(name, "*statio") or tSaS(name, "*marsha")
 		sf = tSaS(name, "*stri") or tSaS(name, "*aerna se")
-		border =  name:match("border turret %d*%-%d*")
+		border =  name:match("border turret %d*%-%d*") or (faction ~= 0 and name:match("turret %d"))
 	end
 	
 	if((FS["FlagHostile"] == true) and mf.LastAggro[charid]) then
